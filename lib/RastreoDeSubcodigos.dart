@@ -190,7 +190,28 @@ class _RastreoDeSubcodigosState extends State<RastreoDeSubcodigos> {
     ];
 
     // Array of emojis
-    List<String> simbolos = ["", "📦", "", "🧾", "📤", "📥"];
+    //                        0   1     2      3     4     5     6     7    8   9   10  11  12  13  14  15  16  17
+    List<String> simbolos = [
+      "",
+      "📦",
+      "🛒",
+      "🧾",
+      "📤",
+      "📥",
+      "↔️",
+      "🔧",
+      "🔧",
+      "↔️",
+      "↔️",
+      "↔️",
+      "↔️",
+      "↔️",
+      "↔️",
+      "↔️",
+      "↔️",
+      "↔️",
+      "↔️"
+    ];
 
     String movimiento = "";
     switch (clave_movimiento) {
@@ -216,6 +237,17 @@ class _RastreoDeSubcodigosState extends State<RastreoDeSubcodigos> {
             child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
+                  // icon
+                  // Column(
+                  //     crossAxisAlignment: CrossAxisAlignment.center,
+                  //     children: [
+                  //       Text(
+                  //         simbolos[int.parse(clave_movimiento)],
+                  //         style: TextStyle(
+                  //             fontWeight: FontWeight.bold, fontSize: 25),
+                  //       ),
+                  //     ]),
+                  // SizedBox(width: 15),
                   Expanded(
                       child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
