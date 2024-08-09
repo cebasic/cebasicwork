@@ -27,11 +27,11 @@ class Articulo {
 
   factory Articulo.fromJson(Map<String, dynamic> json) {
     return Articulo(
-        clave: json['Clave'],
+        clave: json['Clave'].toString(),
         descripcion: json['Descripcion'],
-        existencia: json['Existencia'],
-        precio: json['Precio'],
-        fam: json['fam']);
+        existencia: json['Existencia'].toString(),
+        precio: json['Precio'].toString(),
+        fam: json['fam'].toString());
   }
 }
 
@@ -44,25 +44,31 @@ class _BuscadorListViewState extends State<BuscadorListView> {
   RefreshController _refreshController = RefreshController(
     initialRefresh: false,
   );
-  String server = "http://cbserver.ddnsfree.com:8000";
+  String server = "https://cebasicapi-node-caab21788dab.herokuapp.com";
   List<dynamic> _articulos = [];
+  List<dynamic> _articulosresp = [];
   String? _ventatotal, _comisiontotal, _name;
   bool userisadmin = false;
+  bool showCosto = false;
+  bool descartaExtZero = true;
+  String _text = "";
   Widget build(BuildContext context) {
     return _buscadorListView(_articulos);
   }
 
   _onRefresh() async {
-    // _refreshController.refreshCompleted();
+    _showLoading("Actualizando...");
+    _fetchArticulos(_text);
+    _refreshController.refreshCompleted();
   }
+
   bool _checkedValue = true;
-  String _selectedValue = "Teléfonos y accesorios";
+  String _selectedValue = "Celulares y accesorios";
   TextEditingController tfcontroller = TextEditingController();
 
   Scaffold _buscadorListView(_ventas) {
     // tfcontroller.addListener(() {
     //   print("probando");
-    String _text = "";
     // getIsAdmin();
     // });
     return Scaffold(
@@ -79,11 +85,11 @@ class _BuscadorListViewState extends State<BuscadorListView> {
                   const EdgeInsets.only(left: 16.0, bottom: 8.0, top: 8.0),
               focusedBorder: OutlineInputBorder(
                 borderSide: BorderSide(color: Colors.white),
-                borderRadius: BorderRadius.circular(25.7),
+                borderRadius: BorderRadius.circular(10),
               ),
               enabledBorder: UnderlineInputBorder(
                 borderSide: BorderSide(color: Colors.white),
-                borderRadius: BorderRadius.circular(25.7),
+                borderRadius: BorderRadius.circular(10),
               ),
             ),
             onEditingComplete: () {
@@ -100,6 +106,7 @@ class _BuscadorListViewState extends State<BuscadorListView> {
               _text = text;
             },
           ),
+
           //     TextField(
           //   // border: OutlineInputBorder(),
           //   textInputAction: TextInputAction.search,
@@ -117,7 +124,6 @@ class _BuscadorListViewState extends State<BuscadorListView> {
           //       _fetchArticulos(_text);
           //     }
           //   },
-
           //   onChanged: (text) {
           //     _text = text;
           //   },
@@ -125,52 +131,94 @@ class _BuscadorListViewState extends State<BuscadorListView> {
         ),
         body: Column(
           children: [
-            // Container(
-            //   color: Colors.white38,
-            //   padding: EdgeInsets.only(left: 20, right: 10, top: 5, bottom: 5),
-            //   child: Container(
-            //     height: 30,
-            //     child: Row(
-            //       children: [
-            //         DropdownButton<String>(
-            //           hint: Text(_selectedValue),
-            //           items: <String>[
-            //             'Celulares y accesorios',
-            //             'Celulares',
-            //             'Accesorios'
-            //           ].map((String value) {
-            //             return new DropdownMenuItem<String>(
-            //               value: value,
-            //               child: new Text(value),
-            //             );
-            //           }).toList(),
-            //           onChanged: (selected) {
-            //             this.setState(() {
-            //               _selectedValue = selected;
-            //               print(_selectedValue);
-            //             });
-            //           },
-            //         ),
-            //         SizedBox(
-            //           width: 10,
-            //         ),
-            //         Text(
-            //           "Descartar 0",
-            //           // style: TextStyle(fontSize: 18),
-            //         ),
-            //         Checkbox(
-            //           value: _checkedValue,
-            //           onChanged: (newValue) {
-            //             setState(() {
-            //               _checkedValue = newValue;
-            //               // print(_checkedValue);
-            //             });
-            //           },
-            //         ),
-            //       ],
-            //     ),
-            //   ),
-            // ),
+            Container(
+              color: Theme.of(context).cardColor,
+              padding: EdgeInsets.only(left: 70, right: 10, top: 5, bottom: 5),
+              child: Container(
+                height: 30,
+                child: Row(
+                  children: [
+                    DropdownButton<String>(
+                      hint: Text(_selectedValue),
+                      items: <String>[
+                        'Celulares y accesorios',
+                        'Celulares',
+                        'Accesorios'
+                      ].map((String value) {
+                        return new DropdownMenuItem<String>(
+                          value: value,
+                          child: new Text(value),
+                        );
+                      }).toList(),
+                      onChanged: (selected) {
+                        if (_text != "") {
+                          this.setState(() {
+                            _selectedValue = selected!;
+                            // _showLoading("Buscando");
+                            // filter by selected
+                          });
+                          switch (selected) {
+                            case "Celulares y accesorios":
+                              // _fetchArticulos(_text, "");
+                              setState(() {
+                                _articulos = _articulosresp;
+                              });
+
+                              break;
+                            case "Celulares":
+                              // _fetchArticulos(_text, "C");
+                              setState(() {
+                                _articulos = _articulosresp;
+                                _articulos = _articulos
+                                    .where((element) => element['fam'] == "C")
+                                    .toList();
+                              });
+
+                              break;
+                            case "Accesorios":
+                              // _fetchArticulos(_text, "A");
+                              setState(() {
+                                _articulos = _articulosresp;
+                                _articulos = _articulos
+                                    .where((element) => element['fam'] == "A")
+                                    .toList();
+                              });
+                              break;
+                          }
+                        } else {
+                          _showDialog(
+                              "Para filtrar los resultados, primero escribe en el buscador");
+                        }
+                      },
+                    ),
+                    SizedBox(
+                      width: 1,
+                    ),
+                    userisadmin
+                        ? Row(
+                            children: <Widget>[
+                              Text(
+                                "Costo",
+                                // style: TextStyle(fontSize: 18),
+                              ),
+                              Checkbox(
+                                value: showCosto,
+                                onChanged: (newValue) {
+                                  setState(() {
+                                    showCosto = !showCosto;
+                                    // print(showCosto);
+                                  });
+                                },
+                              ),
+                            ],
+                          )
+                        : SizedBox(
+                            height: 0,
+                          )
+                  ],
+                ),
+              ),
+            ),
             Expanded(
                 child: SmartRefresher(
               header: CustomHeader(
@@ -199,27 +247,17 @@ class _BuscadorListViewState extends State<BuscadorListView> {
               child: ListView.builder(
                   itemCount: _articulos.length,
                   itemBuilder: (context, index) {
-                    if (userisadmin) {
-                      return _tile(
-                          _articulos[index]['Clave'],
-                          _articulos[index]['Descripcion'],
-                          _articulos[index]['Existencia'],
-                          _articulos[index]['Precio'],
-                          _articulos[index]['nComision'],
-                          _articulos[index]['costo'],
-                          true,
-                          _articulos[index]['fam'] != "A");
-                    } else {
-                      return _tile(
-                          _articulos[index]['Clave'],
-                          _articulos[index]['Descripcion'],
-                          _articulos[index]['Existencia'],
-                          _articulos[index]['Precio'],
-                          _articulos[index]['nComision'],
-                          _articulos[index]['costo'],
-                          false,
-                          _articulos[index]['fam'] != "A");
-                    }
+                    return _tile(
+                        _articulos[index]['Clave'].toString(),
+                        _articulos[index]['Descripcion'],
+                        _articulos[index]['Existencia'].toString(),
+                        _articulos[index]['Precio'].toString(),
+                        _articulos[index]['nComision'].toString(),
+                        _articulos[index]['costo'] != null
+                            ? _articulos[index]['costo'].toStringAsFixed(2)
+                            : '',
+                        showCosto,
+                        _articulos[index]['fam'] != "A");
                   }),
             ))
           ],
@@ -283,6 +321,8 @@ class _BuscadorListViewState extends State<BuscadorListView> {
 
   void _showDialog(message) {
     // flutter defined function
+    SystemChannels.textInput.invokeMethod('TextInput.hide');
+
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -311,15 +351,19 @@ class _BuscadorListViewState extends State<BuscadorListView> {
     String user_id = await getUserSF();
     final jobsListAPIUrl =
         server + '/api/searchparam/user/' + user_id + '/' + params;
-    final response = await http.get(jobsListAPIUrl);
+    print(jobsListAPIUrl);
+    Uri uri = Uri.parse(jobsListAPIUrl);
+    final response = await http.get(uri);
+    print(response.body);
 
     if (response.statusCode == 200) {
       var jsonResponse = json.decode(response.body);
       // jsonResponse.insert(0, jsonResponse[0]);
       Navigator.pop(context);
-      SystemChannels.textInput.invokeMethod('TextInput.hide');
+      // print(jsonResponse);
 
       setState(() {
+        _articulosresp = jsonResponse;
         _articulos = jsonResponse;
         userisadmin = userisadminSaved;
       });
@@ -328,6 +372,8 @@ class _BuscadorListViewState extends State<BuscadorListView> {
       //   _articulos = jsonResponse;
       // });
       _refreshController.refreshCompleted();
+      SystemChannels.textInput.invokeMethod('TextInput.hide');
+
       // print(jsonResponse[0]['Clave']);
       return jsonResponse
           .map<Articulo>((articulo) => new Articulo.fromJson(articulo))
@@ -349,7 +395,7 @@ class _BuscadorListViewState extends State<BuscadorListView> {
       Card(
           child: InkWell(
         onTap: () {
-          print("touched: " + clave);
+          // print("touched: " + clave);
           _navigateToNextScreen(
               context, ExistenciaScreen(clave: clave, title: descripcion));
         },
@@ -378,9 +424,7 @@ class _BuscadorListViewState extends State<BuscadorListView> {
                     Row(
                       children: [
                         Text(
-                          "\$" +
-                              int.parse(double.parse(precio).round().toString())
-                                  .toString(),
+                          "\$" + precio,
                           // rng.nextInt(100).toString(),
                           style: TextStyle(
                               color: Colors.green,
@@ -390,13 +434,9 @@ class _BuscadorListViewState extends State<BuscadorListView> {
                         SizedBox(
                           width: userisadmin ? 10 : 0,
                         ),
-                        userisadmin
+                        showCosto
                             ? Text(
-                                "\$" +
-                                    int.parse(double.parse(costo)
-                                            .round()
-                                            .toString())
-                                        .toString(),
+                                "\$" + costo,
                                 // rng.nextInt(100).toString(),
                                 style: TextStyle(
                                   color: Colors.yellow[800],
@@ -415,8 +455,7 @@ class _BuscadorListViewState extends State<BuscadorListView> {
               Column(
                 children: [
                   Text(
-                    int.parse(double.parse(existencia).round().toString())
-                        .toString(),
+                    existencia,
                     style: TextStyle(
                         // color: Colors.black45
                         fontWeight: FontWeight.bold,
@@ -427,11 +466,7 @@ class _BuscadorListViewState extends State<BuscadorListView> {
                     style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
                   ),
                   showcomision
-                      ? Text(
-                          "\$" +
-                              int.parse(
-                                      double.parse(comision).round().toString())
-                                  .toString(),
+                      ? Text("\$" + comision,
                           style: TextStyle(
                               color: Colors.green,
                               fontWeight: FontWeight.bold,

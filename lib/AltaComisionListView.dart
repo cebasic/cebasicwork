@@ -34,12 +34,12 @@ class Articulo {
 
   factory Articulo.fromJson(Map<String, dynamic> json) {
     return Articulo(
-        clave: json['IdArticulo'],
+        clave: json['IdArticulo'].toString(),
         descripcion: json['cDescripcion'],
-        comision: json['nComision'],
-        precio: json['PrecioConImpuesto'],
-        existencia: json['Existencia'],
-        familia: json['nClave_Familia']);
+        comision: json['nComision'].toString(),
+        precio: json['PrecioConImpuesto'].toString(),
+        existencia: json['Existencia'].toString(),
+        familia: json['nClave_Familia'].toString());
   }
 }
 
@@ -53,7 +53,7 @@ class _AltaComisionListViewState extends State<AltaComisionListView> {
   RefreshController _refreshController = RefreshController(
     initialRefresh: true,
   );
-  String server = "http://cbserver.ddnsfree.com:8000";
+  String server = "https://cebasicapi-node-caab21788dab.herokuapp.com";
   List<dynamic> _articulos = [];
   Widget build(BuildContext context) {
     return _AltaComisionListView(_articulos);
@@ -182,12 +182,12 @@ class _AltaComisionListViewState extends State<AltaComisionListView> {
                       return _tile(
                         // "nComision": "150.0000",
                         // nClave_Familia
-                        _articulos[index]['IdArticulo'],
+                        _articulos[index]['IdArticulo'].toString(),
                         _articulos[index]['cDescripcion'],
-                        _articulos[index]['Existencia'],
-                        _articulos[index]['PrecioConImpuesto'],
-                        _articulos[index]['nComision'],
-                        _articulos[index]['nClave_Familia'],
+                        _articulos[index]['Existencia'].toString(),
+                        _articulos[index]['PrecioConImpuesto'].toString(),
+                        _articulos[index]['nComision'].toString(),
+                        _articulos[index]['nClave_Familia'].toString(),
                       );
                     }
                   }),
@@ -263,8 +263,8 @@ class _AltaComisionListViewState extends State<AltaComisionListView> {
   Future<List<Articulo>> _fetchArticulos() async {
     // print("params: " + params);
     String user_id = await getUserSF();
-    final jobsListAPIUrl = server + '/api/altacomision/user/' + user_id + '/';
-    final response = await http.get(jobsListAPIUrl);
+    final jobsListAPIUrl = server + '/api/altacomision/user/' + user_id;
+    final response = await http.get(Uri.parse(jobsListAPIUrl));
 
     if (response.statusCode == 200) {
       var jsonResponse = json.decode(response.body);

@@ -35,6 +35,16 @@ class Dashboard extends StatelessWidget {
                     height: 35,
                   ),
                 ),
+                Container(
+                  margin: EdgeInsets.only(left: 10),
+                  child: Text(
+                    "ceBasic Work",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 20,
+                    ),
+                  ),
+                ),
               ],
             ),
             actions: <Widget>[
@@ -157,6 +167,25 @@ class Dashboard extends StatelessWidget {
                     },
                   ),
                 )),
+                // Card(
+                //     child: Container(
+                //   padding: EdgeInsets.all(20),
+                //   child: InkWell(
+                //     child: Row(
+                //       children: [
+                //         Icon(Icons.fingerprint),
+                //         SizedBox(width: 15),
+                //         Text(
+                //           "Checador",
+                //           style: TextStyle(fontSize: 20),
+                //         )
+                //       ],
+                //     ),
+                //     onTap: () {
+                //       _navigateToNextScreen(context, RastreoDeSubcodigos());
+                //     },
+                //   ),
+                // )),
               ],
             ),
             // child: VentaListView()

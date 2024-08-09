@@ -54,8 +54,11 @@ class _RastreoDeSubcodigosState extends State<RastreoDeSubcodigos> {
   // get data from http://cbserver.ddnsfree.com:8000/getmovimientosbyimei/{{imei}}
   getData(String imei) async {
     _showLoading("Cargando");
-    var url = "http://cbserver.ddnsfree.com:8000/getmovimientosbyimei/$imei";
-    var response = await http.get(url);
+    var url =
+        "https://cebasicapi-node-caab21788dab.herokuapp.com/getmovimientosbyimei/$imei";
+    Uri uri = Uri.parse(url);
+    print(uri);
+    var response = await http.get(uri);
     var datares = jsonDecode(response.body);
 
     // ordena al revés datares
@@ -64,7 +67,7 @@ class _RastreoDeSubcodigosState extends State<RastreoDeSubcodigos> {
     setState(() {
       defaultdata = (datares.length == 0 || datares == null)
           ? "No se encontraron resultados"
-          : "Escribe o escanea un IMEI/Serial";
+          : "Escribe o escanea un IMEI/Serie";
       this.data = datares;
       Navigator.pop(context);
     });
@@ -84,7 +87,7 @@ class _RastreoDeSubcodigosState extends State<RastreoDeSubcodigos> {
             decoration: InputDecoration(
               filled: true,
               fillColor: Colors.white,
-              hintText: 'Buscar IMEI/Serial',
+              hintText: 'Buscar IMEI/Serie',
               contentPadding:
                   const EdgeInsets.only(left: 16.0, bottom: 8.0, top: 10.0),
               focusedBorder: OutlineInputBorder(
@@ -97,14 +100,14 @@ class _RastreoDeSubcodigosState extends State<RastreoDeSubcodigos> {
               ),
             ),
             onEditingComplete: () {
-              SystemChannels.textInput.invokeMethod('TextInput.hide');
+              // SystemChannels.textInput.invokeMethod('TextInput.hide');
               if (_querytext.length > 1) {
                 getData(_querytext).then((value) {
                   // print result
                 });
               } else {
                 // _showDialog("Para buscar, escribe más de 1 caracter");
-                SystemChannels.textInput.invokeMethod('TextInput.hide');
+                // SystemChannels.textInput.invokeMethod('TextInput.hide');
               }
             },
             onChanged: (text) {
@@ -132,13 +135,13 @@ class _RastreoDeSubcodigosState extends State<RastreoDeSubcodigos> {
                         itemCount: data.length,
                         itemBuilder: (context, index) {
                           return _tile(
-                              data[index]["Clave_Movimiento"],
-                              data[index]["Decripcion_Movimiento"],
-                              data[index]["Descripcion_Articulo"],
-                              data[index]["Descripcion_Involucrado"],
-                              data[index]["Descripcion_Almacen"],
-                              data[index]["Nombre_Empleado"],
-                              data[index]["Fecha"]);
+                              data[index]["Clave_Movimiento"].toString(),
+                              data[index]["Decripcion_Movimiento"].toString(),
+                              data[index]["Descripcion_Articulo"].toString(),
+                              data[index]["Descripcion_Involucrado"].toString(),
+                              data[index]["Descripcion_Almacen"].toString(),
+                              data[index]["Nombre_Empleado"].toString(),
+                              data[index]["Fecha"].toString());
                         },
                       ))
           ],

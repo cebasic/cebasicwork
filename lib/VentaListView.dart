@@ -13,21 +13,26 @@ class Venta {
   final String nimporte;
   final String nimporteComision;
   final String dfecha_reg;
+  final String fam;
 
-  Venta(
-      {required this.nfolio,
-      required this.cdescripcion,
-      required this.nimporte,
-      required this.nimporteComision,
-      required this.dfecha_reg});
+  Venta({
+    required this.nfolio,
+    required this.cdescripcion,
+    required this.nimporte,
+    required this.nimporteComision,
+    required this.dfecha_reg,
+    required this.fam,
+  });
 
   factory Venta.fromJson(Map<String, dynamic> json) {
     return Venta(
-      nfolio: json['nfolio'],
-      cdescripcion: json['cdescripcion'],
-      nimporte: json['nimporte'],
-      nimporteComision: json['nimporteComision'],
-      dfecha_reg: json['dfecha_reg'],
+      nfolio: json['nfolio'].toString(), // Convertir int a String
+      cdescripcion: json['cdescripcion'] as String,
+      nimporte:
+          json['nimporte'].toString(), // Convertir double a String y redondear
+      nimporteComision: json['nimporteComision'].toString(),
+      dfecha_reg: json['dfecha_reg'] as String,
+      fam: json['fam'].toString(),
     );
   }
 }
@@ -96,11 +101,11 @@ class _VentaListViewState extends State<VentaListView> {
                     // } else {
                     return _tile(
                         _ventas[index]['cdescripcion'],
-                        _ventas[index]['nimporte'],
-                        _ventas[index]['nimporteComision'],
-                        _ventas[index]['nfolio'],
-                        _ventas[index]['dfecha_reg'],
-                        _ventas[index]['fam']);
+                        _ventas[index]['nimporte'].toString(),
+                        _ventas[index]['nimporteComision'].toString(),
+                        _ventas[index]['nfolio'].toString(),
+                        _ventas[index]['dfecha_reg'].toString(),
+                        _ventas[index]['fam'].toString());
                     // }
                   })
               : (SizedBox(
@@ -117,28 +122,30 @@ class _VentaListViewState extends State<VentaListView> {
   Future<List<Venta>> _fetchVentas() async {
     String user = await getUserSF();
     final jobsListAPIUrl =
-        'http://cbserver.ddnsfree.com:8000/reporteuserventas/' + user;
-    final response = await http.get(jobsListAPIUrl);
+        'https://cebasicapi-node-caab21788dab.herokuapp.com/reporteuserventas/' +
+            user;
+    print(jobsListAPIUrl);
+    Uri uri = Uri.parse(jobsListAPIUrl);
+    final response = await http.get(uri);
+    print(response.body);
+
     if (response.statusCode == 200) {
-      List jsonResponse = json.decode(response.body);
-      jsonResponse.insert(0, jsonResponse[0]);
-      // print(jsonResponse);
+      Map<String, dynamic> jsonResponse = json.decode(response.body);
+
       setState(() {
-        _ventatotal = jsonResponse[0]['ventatotal'] == null
-            ? "0.0"
-            : jsonResponse[0]['ventatotal'];
-        _comisiontotal = jsonResponse[0]['comisiontotal'] == null
-            ? "0.0"
-            : jsonResponse[0]['comisiontotal'];
-        _retardos_del_mes = jsonResponse[0]['retardos_del_mes'] == null
-            ? "0"
-            : jsonResponse[0]['retardos_del_mes'];
-        _ventas = jsonResponse[0]['venta'];
-        _name = jsonResponse[0]['name'];
+        _ventatotal = jsonResponse['ventatotal']?.toString() ?? "0.0";
+        _comisiontotal = jsonResponse['comisiontotal']?.toString() ?? "0.0";
+        _retardos_del_mes = jsonResponse['retardos_del_mes']?.toString() ?? "0";
+        _ventas = jsonResponse['venta'];
+        _name = jsonResponse['name'] ?? '';
         HapticFeedback.mediumImpact();
       });
 
-      return jsonResponse.map((venta) => new Venta.fromJson(venta)).toList();
+      // Extraer la lista de ventas desde el campo 'venta'
+      List<dynamic> ventasList = jsonResponse['venta'] ?? [];
+
+      // Convertir la lista de ventas al tipo List<Venta>
+      return ventasList.map((venta) => Venta.fromJson(venta)).toList();
     } else {
       throw Exception('Failed to load jobs from API');
     }
@@ -167,7 +174,7 @@ class _VentaListViewState extends State<VentaListView> {
   }
 
   Card _tile(String title, String venta, String comision, String folio,
-          dfecha_reg, String familia) =>
+          String dfecha_reg, String familia) =>
       Card(
           child: Container(
         padding: EdgeInsets.all(20),

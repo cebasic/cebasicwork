@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'dart:ui';
-import 'package:flex_color_scheme/flex_color_scheme.dart';
+// import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:flutter/material.dart';
 // import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:http/http.dart' as http;
@@ -9,7 +9,7 @@ import 'dashboard.dart';
 import 'package:flutter/services.dart';
 
 void main() {
-  SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+  // SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
 
   runApp(MyApp());
 }
@@ -23,10 +23,8 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.green,
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      darkTheme: FlexThemeData.dark(
-        scheme: FlexScheme.deepBlue,
-        visualDensity: VisualDensity.adaptivePlatformDensity,
-        darkIsTrueBlack: true,
+      darkTheme: ThemeData(
+        brightness: Brightness.dark,
       ),
       // themeMode: ThemeMode.dark,
 
@@ -135,7 +133,8 @@ class _MyHomePageState extends State<MyHomePage> {
 
     String urla = 'http://cbserver.ddnsfree.com:8000/auth/' + u + '/' + p;
     print(urla);
-    final response = await http.get(urla);
+    Uri url = Uri.parse(urla);
+    final response = await http.get(url);
     print(response.body);
     if (response.statusCode == 200) {
       Map<String, dynamic> responseJson = json.decode(response.body);

@@ -149,7 +149,7 @@ class _ExistenciaListViewState extends State<ExistenciaListView> {
         user_id +
         '/existenciadetalle/' +
         params;
-    final response = await http.get(jobsListAPIUrl);
+    final response = await http.get(Uri.parse(jobsListAPIUrl));
 
     if (response.statusCode == 200) {
       var jsonResponse = json.decode(response.body);

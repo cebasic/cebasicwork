@@ -2,7 +2,7 @@ name: cebasicwork
 description: A new Flutter project.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 
-version: 1.0.2+8
+version: 1.0.6+13
 
 environment:
   sdk: '>=2.19.2 <3.0.0'
@@ -11,17 +11,18 @@ dependencies:
     sdk: flutter
  
   cupertino_icons: ^1.0.0
-  http: ^0.12.0+1
+  http: ^1.0.0
   shared_preferences_ios: ^2.0.8
   shared_preferences: ^2.0.11
   pull_to_refresh: ^2.0.0
   url_launcher: ^6.0.17
-  font_awesome_flutter: ^8.10.0
+  font_awesome_flutter: ^10.4.0
   badges: ^2.0.1
   flutter_launcher_icons: ^0.11.0
   flutter_barcode_scanner: ^2.0.0
   flex_color_scheme: ^6.1.2
-
+assets:
+  - .env
 dev_dependencies:
   flutter_test:
     sdk: flutter
