@@ -58,7 +58,8 @@ class _BuscadorListViewState extends State<BuscadorListView> {
 
   _onRefresh() async {
     _showLoading("Actualizando...");
-    _fetchArticulos(_text);
+    await _fetchArticulos(_text);
+    _applyFilter();
     _refreshController.refreshCompleted();
   }
 
@@ -96,8 +97,7 @@ class _BuscadorListViewState extends State<BuscadorListView> {
               SystemChannels.textInput.invokeMethod('TextInput.hide');
               if (_text.length > 1) {
                 _showLoading("Buscando");
-                // print(_text);
-                _fetchArticulos(_text);
+                _fetchArticulos(_text).then((_) => _applyFilter());
               } else {
                 _showDialog("Para buscar, escribe más de 1 caracter");
               }
@@ -154,37 +154,8 @@ class _BuscadorListViewState extends State<BuscadorListView> {
                         if (_text != "") {
                           this.setState(() {
                             _selectedValue = selected!;
-                            // _showLoading("Buscando");
-                            // filter by selected
                           });
-                          switch (selected) {
-                            case "Celulares y accesorios":
-                              // _fetchArticulos(_text, "");
-                              setState(() {
-                                _articulos = _articulosresp;
-                              });
-
-                              break;
-                            case "Celulares":
-                              // _fetchArticulos(_text, "C");
-                              setState(() {
-                                _articulos = _articulosresp;
-                                _articulos = _articulos
-                                    .where((element) => element['fam'] == "C")
-                                    .toList();
-                              });
-
-                              break;
-                            case "Accesorios":
-                              // _fetchArticulos(_text, "A");
-                              setState(() {
-                                _articulos = _articulosresp;
-                                _articulos = _articulos
-                                    .where((element) => element['fam'] == "A")
-                                    .toList();
-                              });
-                              break;
-                          }
+                          _applyFilter();
                         } else {
                           _showDialog(
                               "Para filtrar los resultados, primero escribe en el buscador");
@@ -257,7 +228,7 @@ class _BuscadorListViewState extends State<BuscadorListView> {
                             ? _articulos[index]['costo'].toStringAsFixed(2)
                             : '',
                         showCosto,
-                        _articulos[index]['fam'] != "A");
+                        true);
                   }),
             ))
           ],
@@ -367,7 +338,7 @@ class _BuscadorListViewState extends State<BuscadorListView> {
         _articulos = jsonResponse;
         userisadmin = userisadminSaved;
       });
-
+      _applyFilter();
       // setState(() {
       //   _articulos = jsonResponse;
       // });
@@ -380,6 +351,28 @@ class _BuscadorListViewState extends State<BuscadorListView> {
           .toList();
     } else {
       throw Exception('Failed to load jobs from API');
+    }
+  }
+
+  void _applyFilter() {
+    switch (_selectedValue) {
+      case "Celulares y accesorios":
+        setState(() {
+          _articulos = _articulosresp;
+        });
+        break;
+      case "Celulares":
+        setState(() {
+          _articulos =
+              _articulosresp.where((element) => element['fam'] == "C").toList();
+        });
+        break;
+      case "Accesorios":
+        setState(() {
+          _articulos =
+              _articulosresp.where((element) => element['fam'] == "A").toList();
+        });
+        break;
     }
   }
 

@@ -131,7 +131,10 @@ class _MyHomePageState extends State<MyHomePage> {
   login(u, p) async {
     _showDialog("Iniciando sesión ...");
 
-    String urla = 'http://cbserver.ddnsfree.com:8000/auth/' + u + '/' + p;
+    String urla = 'https://cebasicapi-node-caab21788dab.herokuapp.com/auth/' +
+        u +
+        '/' +
+        p;
     print(urla);
     Uri url = Uri.parse(urla);
     final response = await http.get(url);

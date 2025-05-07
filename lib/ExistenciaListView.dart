@@ -32,10 +32,10 @@ class Existencia {
 
   factory Existencia.fromJson(Map<String, dynamic> json) {
     return Existencia(
-      clave: json['Clave'],
+      clave: json['Clave'].toString(),
       descripcion: json['Descripcion'],
-      existencia: json['Existencia'],
-      precio: json['Precio'],
+      existencia: json['Existencia'].toString(),
+      precio: json['Precio'].toString(),
       almacen: json['cAlmacenDescripcion'],
     );
   }
@@ -130,10 +130,10 @@ class _ExistenciaListViewState extends State<ExistenciaListView> {
                     if (false) {
                     } else {
                       return _tile(
-                        _articulos[index]['Clave'],
+                        _articulos[index]['Clave'].toString(),
                         _articulos[index]['cAlmacenDescripcion'],
-                        _articulos[index]['Existencia'],
-                        _articulos[index]['Precio'],
+                        _articulos[index]['Existencia'].toString(),
+                        _articulos[index]['Precio'].toString(),
                       );
                     }
                   }),
@@ -145,10 +145,12 @@ class _ExistenciaListViewState extends State<ExistenciaListView> {
   Future<List<Existencia>> _fetchArticulos(String params) async {
     print("params: " + params);
     String user_id = await getUserSF();
-    final jobsListAPIUrl = 'http://cbserver.ddnsfree.com:8000/api/user/' +
-        user_id +
-        '/existenciadetalle/' +
-        params;
+    final jobsListAPIUrl =
+        'https://cebasicapi-node-caab21788dab.herokuapp.com/api/user/' +
+            user_id +
+            '/existenciadetalle/' +
+            params;
+    print(jobsListAPIUrl);
     final response = await http.get(Uri.parse(jobsListAPIUrl));
 
     if (response.statusCode == 200) {

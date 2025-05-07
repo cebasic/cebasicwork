@@ -51,66 +51,102 @@ class _VentaListViewState extends State<VentaListView> {
       _comisiontotal = "",
       _name = "",
       _retardos_del_mes = "";
+  bool _isFetchingInitially =
+      true; // Nueva variable de estado para la carga inicial
+
   Widget build(BuildContext context) {
     return _ventaListView(_ventas);
   }
 
   _onRefresh() async {
     HapticFeedback.mediumImpact();
-    _fetchVentas();
-    _refreshController.refreshCompleted();
+    // No es necesario setState para _isFetchingInitially aquí si la recarga es manual,
+    // ya que el header del SmartRefresher indicará la carga.
+    // Si es la carga inicial, _isFetchingInitially ya es true.
+    try {
+      await _fetchVentas();
+      if (mounted) {
+        _refreshController.refreshCompleted();
+      }
+    } catch (e) {
+      print("Error en _onRefresh: $e");
+      if (mounted) {
+        _refreshController.refreshFailed();
+      }
+    }
   }
 
   Scaffold _ventaListView(_ventas) {
     return Scaffold(
-        appBar: AppBar(
-          title: Text("Mi historial de ventas"),
+      appBar: AppBar(
+        title: Text("Mi historial de ventas"),
+      ),
+      body: SmartRefresher(
+        header: CustomHeader(
+          builder: (context, mode) {
+            Widget body = Text("Jala para recargar ⬇️");
+            if (mode == RefreshStatus.idle) {
+              body = Text("Jala para recargar ⬇️");
+            } else if (mode == RefreshStatus.refreshing) {
+              body = Text("Cargando...");
+            } else if (mode == RefreshStatus.canRefresh) {
+              body = Text("Suelta para recargar ⬆️");
+            } else if (mode == RefreshStatus.completed) {
+              body = Text("Listo ✅");
+            }
+            return Container(
+              height: 60.0,
+              child: Center(
+                child: body,
+              ),
+            );
+          },
         ),
-        body: SmartRefresher(
-          header: CustomHeader(
-            builder: (context, mode) {
-              Widget body = Text("Jala para recargar ⬇️");
-              if (mode == RefreshStatus.idle) {
-                body = Text("Jala para recargar ⬇️");
-              } else if (mode == RefreshStatus.refreshing) {
-                body = Text("Cargando...");
-              } else if (mode == RefreshStatus.canRefresh) {
-                body = Text("Suelta para recargar ⬆️");
-              } else if (mode == RefreshStatus.completed) {
-                body = Text("Listo ✅");
-              }
-              return Container(
-                height: 60.0,
-                child: Center(
-                  child: body,
+        controller: _refreshController,
+        onRefresh: _onRefresh,
+        child: _isFetchingInitially && _ventas.isEmpty
+            ? Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    CircularProgressIndicator(),
+                    SizedBox(height: 20),
+                    Text(
+                      "Cargando información...",
+                      style: TextStyle(
+                        fontSize: 18,
+                        color: Theme.of(context)
+                            .textTheme
+                            .bodySmall
+                            ?.color
+                            ?.withOpacity(0.7),
+                      ),
+                    ),
+                  ],
                 ),
-              );
-            },
-          ),
-          controller: _refreshController,
-          onRefresh: _onRefresh,
-          child: _ventas.length != 0
-              ? ListView.builder(
-                  itemCount: _ventas.length,
-                  itemBuilder: (context, index) {
-                    // if (_ventas.length == 0) {
-                    // return _resumen(_ventas[index]['cdescripcion']);
-                    // }
-                    // if (index == 0) {
-                    //   return _resumen(_name);
-                    // } else {
-                    return _tile(
-                        _ventas[index]['cdescripcion'],
-                        _ventas[index]['nimporte'].toString(),
-                        _ventas[index]['nimporteComision'].toString(),
-                        _ventas[index]['nfolio'].toString(),
-                        _ventas[index]['dfecha_reg'].toString(),
-                        _ventas[index]['fam'].toString());
-                    // }
-                  })
-              : (SizedBox(
-                  height: 100, child: Center(child: Text("Cargando...")))),
-        ));
+              )
+            : _ventas.isNotEmpty
+                ? ListView.builder(
+                    itemCount: _ventas.length,
+                    itemBuilder: (context, index) {
+                      return _tile(
+                          context,
+                          _ventas[index]['cdescripcion'],
+                          _ventas[index]['nimporte'].toString(),
+                          _ventas[index]['nimporteComision'].toString(),
+                          _ventas[index]['nfolio'].toString(),
+                          _ventas[index]['dfecha_reg'].toString(),
+                          _ventas[index]['fam'].toString());
+                    })
+                : Center(
+                    child: Text(
+                      "Sin ventas registradas",
+                      style: TextStyle(fontSize: 22),
+                    ),
+                  ),
+      ),
+    );
   }
 
   getUserSF() async {
@@ -126,28 +162,49 @@ class _VentaListViewState extends State<VentaListView> {
             user;
     print(jobsListAPIUrl);
     Uri uri = Uri.parse(jobsListAPIUrl);
-    final response = await http.get(uri);
-    print(response.body);
 
-    if (response.statusCode == 200) {
-      Map<String, dynamic> jsonResponse = json.decode(response.body);
+    try {
+      final response = await http.get(uri);
+      print(response.body);
 
-      setState(() {
-        _ventatotal = jsonResponse['ventatotal']?.toString() ?? "0.0";
-        _comisiontotal = jsonResponse['comisiontotal']?.toString() ?? "0.0";
-        _retardos_del_mes = jsonResponse['retardos_del_mes']?.toString() ?? "0";
-        _ventas = jsonResponse['venta'];
-        _name = jsonResponse['name'] ?? '';
-        HapticFeedback.mediumImpact();
-      });
+      if (response.statusCode == 200) {
+        Map<String, dynamic> jsonResponse = json.decode(response.body);
 
-      // Extraer la lista de ventas desde el campo 'venta'
-      List<dynamic> ventasList = jsonResponse['venta'] ?? [];
+        if (mounted) {
+          setState(() {
+            _ventatotal = jsonResponse['ventatotal']?.toString() ?? "0.0";
+            _comisiontotal = jsonResponse['comisiontotal']?.toString() ?? "0.0";
+            _retardos_del_mes =
+                jsonResponse['retardos_del_mes']?.toString() ?? "0";
+            _ventas = jsonResponse['venta'];
+            _name = jsonResponse['name'] ?? '';
+            if (_isFetchingInitially) _isFetchingInitially = false;
+            // HapticFeedback.mediumImpact(); // Ya está en _onRefresh
+          });
+        }
 
-      // Convertir la lista de ventas al tipo List<Venta>
-      return ventasList.map((venta) => Venta.fromJson(venta)).toList();
-    } else {
-      throw Exception('Failed to load jobs from API');
+        List<dynamic> ventasList = jsonResponse['venta'] ?? [];
+        return ventasList.map((venta) => Venta.fromJson(venta)).toList();
+      } else {
+        if (mounted) {
+          setState(() {
+            if (_isFetchingInitially) _isFetchingInitially = false;
+          });
+        }
+        throw Exception(
+            'Failed to load jobs from API. Status code: ${response.statusCode}');
+      }
+    } catch (e) {
+      print("Error en _fetchVentas: $e");
+      if (mounted) {
+        setState(() {
+          if (_isFetchingInitially) _isFetchingInitially = false;
+          // Opcionalmente, limpiar _ventas si falló la carga
+          // _ventas = [];
+        });
+      }
+      throw Exception(
+          'Failed to load jobs from API: $e'); // Relanzar para que _onRefresh lo maneje
     }
   }
 
@@ -169,83 +226,170 @@ class _VentaListViewState extends State<VentaListView> {
   ];
   var rng = new Random();
   String formatFecha(String fecha) {
-    var arr = fecha.split('.');
-    return arr[0];
+    if (fecha.isEmpty) return '';
+    try {
+      DateTime dateTime = DateTime.parse(fecha);
+      String dia = dateTime.day.toString().padLeft(2, '0');
+      String mes = dateTime.month.toString().padLeft(2, '0');
+      String anio = dateTime.year.toString();
+      String hora = dateTime.hour.toString().padLeft(2, '0');
+      String minuto = dateTime.minute.toString().padLeft(2, '0');
+      return '$dia/$mes/$anio $hora:$minuto';
+    } catch (e) {
+      // Si hay un error al parsear, devuelve la fecha original o un mensaje de error
+      print('Error al formatear fecha: $e');
+      // Intenta con el formato anterior si el nuevo falla, por si acaso.
+      var arr = fecha.split('.');
+      if (arr.isNotEmpty) {
+        return arr[0];
+      }
+      return fecha; // o 'Fecha inválida'
+    }
   }
 
-  Card _tile(String title, String venta, String comision, String folio,
-          String dfecha_reg, String familia) =>
-      Card(
-          child: Container(
-        padding: EdgeInsets.all(20),
-        child: Row(
-          children: [
-            Column(
-              children: [
-                Icon(Icons.point_of_sale),
-                Text("Folio", style: TextStyle(fontSize: 10)),
-                Text(folio, style: TextStyle(fontSize: 10))
-              ],
-            ),
-            Container(
-              width: 20,
-            ),
-            Flexible(
-                child: Container(
+  Card _tile(BuildContext context, String title, String venta, String comision,
+      String folio, String dfecha_reg, String familia) {
+    final brightness =
+        Theme.of(context).brightness; // Determinar el brillo actual
 
-                    // padding: EdgeInsets.only(right: 10),
-                    child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+    // Definir colores para modo claro y oscuro
+    final Color folioIconColor =
+        brightness == Brightness.dark ? Colors.blueGrey[200]! : Colors.blueGrey;
+    final Color folioTextColor =
+        brightness == Brightness.dark ? Colors.blueGrey[200]! : Colors.blueGrey;
+    final Color folioNumberColor = brightness == Brightness.dark
+        ? Colors.blueGrey[100]!
+        : Colors.blueGrey[700]!;
+
+    final Color dateIconColor =
+        brightness == Brightness.dark ? Colors.grey[400]! : Colors.grey[600]!;
+    final Color dateTextColor =
+        brightness == Brightness.dark ? Colors.grey[300]! : Colors.grey[700]!;
+
+    // Colores para Comisión basados en AltaComisionListView (verde)
+    final Color commissionAmountColor = brightness == Brightness.dark
+        ? Colors.greenAccent[400]!
+        : Colors.green; // Verde para modo claro
+    final Color commissionTextColor = brightness == Brightness.dark
+        ? Colors.greenAccent[200]!
+        : Colors.green[700]!; // Verde más oscuro para texto en modo claro
+
+    // Colores para Venta basados en el "Precio" de AltaComisionListView (verde)
+    final Color saleAmountColor = brightness == Brightness.dark
+        ? const Color.fromARGB(255, 132, 135, 134)!
+        : Colors.green; // Verde para modo claro
+    final Color saleTextColor = brightness == Brightness.dark
+        ? Colors.greenAccent[200]!
+        : Colors.green[700]!; // Verde más oscuro para texto en modo claro
+
+    final Color cardBackgroundColor =
+        brightness == Brightness.dark ? Colors.grey[900]! : Colors.white;
+
+    return Card(
+      color: cardBackgroundColor,
+      margin: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      elevation: 3,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: Padding(
+        padding: EdgeInsets.all(16),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Columna Izquierda: Folio
+            Column(
+              mainAxisAlignment:
+                  MainAxisAlignment.center, // Centrar verticalmente
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
+                Icon(Icons.receipt_long, color: folioIconColor, size: 28),
+                SizedBox(height: 4),
+                Text("Folio",
+                    style: TextStyle(fontSize: 10, color: folioTextColor)),
                 Text(
-                  title,
-                  overflow: TextOverflow.fade,
-                ),
-                Text(
-                  dfecha_reg.split('.')[0],
-                  overflow: TextOverflow.fade,
+                  folio,
+                  style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.bold,
+                      color: folioNumberColor),
                 ),
               ],
-            ))),
+            ),
+            SizedBox(width: 16),
+            // Columna Central: Descripción y Fecha (Expandida)
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title, // cdescripcion
+                    style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight
+                            .w500), // Se mantiene, debería adaptarse al tema
+                    maxLines: 3,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Icon(Icons.access_time, size: 14, color: dateIconColor),
+                      SizedBox(width: 4),
+                      Text(
+                        formatFecha(dfecha_reg),
+                        style: TextStyle(fontSize: 12, color: dateTextColor),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            SizedBox(width: 16),
+            // Columna Derecha: Importes
             Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              mainAxisAlignment:
+                  MainAxisAlignment.center, // Centrar verticalmente
               children: [
-                familia == "2" || double.parse(comision).round() == 0
-                    ? SizedBox(
-                        height: 0,
-                      )
-                    : Text(
+                if (double.parse(comision).round() != 0)
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Text(
                         "\$" + double.parse(comision).round().toString(),
-                        // rng.nextInt(100).toString(),
                         style: TextStyle(
-                          color: Colors.green,
+                          color: commissionAmountColor,
                           fontWeight: FontWeight.bold,
+                          fontSize: 16,
                         ),
                       ),
-                familia == "2" || double.parse(comision).round() == 0
-                    ? SizedBox(
-                        height: 0,
-                      )
-                    : Text(
+                      Text(
                         "Comisión",
-                        // rng.nextInt(100).toString(),
                         style: TextStyle(
-                            color: Colors.green, fontWeight: FontWeight.bold),
+                          color: commissionTextColor,
+                          fontSize: 10,
+                        ),
                       ),
+                      SizedBox(height: 8),
+                    ],
+                  ),
                 Text(
                   "\$" + double.parse(venta).round().toString(),
                   style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                  ),
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                      color: saleAmountColor),
                 ),
                 Text(
                   "Venta",
-                  // style: TextStyle(color: Colors.black45),
+                  style: TextStyle(fontSize: 10, color: saleAmountColor),
                 ),
               ],
             )
           ],
         ),
-      ));
+      ),
+    );
+  }
 
   Card _resumen(String title) => Card(
           child: Container(

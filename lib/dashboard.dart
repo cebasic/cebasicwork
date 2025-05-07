@@ -32,7 +32,7 @@ class Dashboard extends StatelessWidget {
                   child: Image.asset(
                     'images/logocb.png',
                     fit: BoxFit.contain,
-                    height: 35,
+                    height: 27,
                   ),
                 ),
                 Container(
