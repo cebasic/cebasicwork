@@ -53,6 +53,8 @@ class _BuscadorListViewState extends State<BuscadorListView>
   Timer? _longPressTimer;
   bool _showingCostForAll = false;
   bool _hasSearched = false;
+  late TextEditingController _textController;
+  late FocusNode _focusNode;
 
   late AnimationController _fadeController;
   late AnimationController _slideController;
@@ -62,6 +64,9 @@ class _BuscadorListViewState extends State<BuscadorListView>
   @override
   void initState() {
     super.initState();
+    _textController = TextEditingController(text: _text);
+    _focusNode = FocusNode();
+
     _fadeController = AnimationController(
       duration: Duration(milliseconds: 1000),
       vsync: this,
@@ -129,6 +134,8 @@ class _BuscadorListViewState extends State<BuscadorListView>
   void dispose() {
     _fadeController.dispose();
     _slideController.dispose();
+    _textController.dispose();
+    _focusNode.dispose();
     _cancelLongPressTimer();
     super.dispose();
   }
@@ -142,6 +149,9 @@ class _BuscadorListViewState extends State<BuscadorListView>
       _showLoading("Actualizando...");
       await _fetchArticulos(_text);
       _applyFilter();
+      // Asegurar que el teclado permanezca cerrado después del refresh
+      _focusNode.unfocus();
+      SystemChannels.textInput.invokeMethod('TextInput.hide');
     }
     _refreshController.refreshCompleted();
   }
@@ -230,6 +240,8 @@ class _BuscadorListViewState extends State<BuscadorListView>
                           children: [
                             Expanded(
                               child: TextField(
+                                controller: _textController,
+                                focusNode: _focusNode,
                                 textInputAction: TextInputAction.search,
                                 autofocus: true,
                                 style: TextStyle(
@@ -256,6 +268,8 @@ class _BuscadorListViewState extends State<BuscadorListView>
                                   ),
                                 ),
                                 onEditingComplete: () {
+                                  _text = _textController.text;
+                                  _focusNode.unfocus();
                                   SystemChannels.textInput
                                       .invokeMethod('TextInput.hide');
                                   if (_text.length > 1) {
@@ -876,6 +890,8 @@ class _BuscadorListViewState extends State<BuscadorListView>
       });
       _applyFilter();
       _refreshController.refreshCompleted();
+      // Asegurar que el teclado permanezca cerrado
+      _focusNode.unfocus();
       SystemChannels.textInput.invokeMethod('TextInput.hide');
 
       return jsonResponse

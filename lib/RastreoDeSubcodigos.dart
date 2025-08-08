@@ -21,6 +21,8 @@ class _RastreoDeSubcodigosState extends State<RastreoDeSubcodigos>
   String _querytext = "";
   String defaultdata = "Escribe o escanea un IMEI/Serial";
   var data;
+  late TextEditingController _textController;
+  late FocusNode _focusNode;
 
   late AnimationController _fadeController;
   late AnimationController _slideController;
@@ -30,6 +32,9 @@ class _RastreoDeSubcodigosState extends State<RastreoDeSubcodigos>
   @override
   void initState() {
     super.initState();
+    _textController = TextEditingController(text: _querytext);
+    _focusNode = FocusNode();
+
     _fadeController = AnimationController(
       duration: Duration(milliseconds: 1000),
       vsync: this,
@@ -65,6 +70,8 @@ class _RastreoDeSubcodigosState extends State<RastreoDeSubcodigos>
   void dispose() {
     _fadeController.dispose();
     _slideController.dispose();
+    _textController.dispose();
+    _focusNode.dispose();
     super.dispose();
   }
 
@@ -122,6 +129,8 @@ class _RastreoDeSubcodigosState extends State<RastreoDeSubcodigos>
         this.data = datares;
       });
 
+      // Asegurar que el teclado permanezca cerrado
+      _focusNode.unfocus();
       SystemChannels.textInput.invokeMethod('TextInput.hide');
       return datares;
     } catch (e) {
@@ -134,6 +143,9 @@ class _RastreoDeSubcodigosState extends State<RastreoDeSubcodigos>
         defaultdata = "Error al cargar los datos";
         this.data = null;
       });
+      // Asegurar que el teclado permanezca cerrado en caso de error
+      _focusNode.unfocus();
+      SystemChannels.textInput.invokeMethod('TextInput.hide');
       return null;
     }
   }
@@ -218,8 +230,8 @@ class _RastreoDeSubcodigosState extends State<RastreoDeSubcodigos>
                           children: [
                             Expanded(
                               child: TextField(
-                                controller:
-                                    TextEditingController(text: _querytext),
+                                controller: _textController,
+                                focusNode: _focusNode,
                                 textInputAction: TextInputAction.search,
                                 autofocus: true,
                                 style: TextStyle(
@@ -246,6 +258,8 @@ class _RastreoDeSubcodigosState extends State<RastreoDeSubcodigos>
                                   ),
                                 ),
                                 onEditingComplete: () {
+                                  _querytext = _textController.text;
+                                  _focusNode.unfocus();
                                   SystemChannels.textInput
                                       .invokeMethod('TextInput.hide');
                                   if (_querytext.length > 1) {
