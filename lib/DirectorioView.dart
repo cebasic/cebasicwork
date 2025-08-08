@@ -1,246 +1,565 @@
 import 'package:flutter/material.dart';
-// import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
-// import 'package:flutter_launch/flutter_launch.dart';
 
-class DirectorioView extends StatelessWidget {
+class DirectorioView extends StatefulWidget {
   const DirectorioView({Key? key}) : super(key: key);
 
+  @override
+  _DirectorioViewState createState() => _DirectorioViewState();
+}
+
+class _DirectorioViewState extends State<DirectorioView>
+    with TickerProviderStateMixin {
+  late AnimationController _fadeController;
+  late AnimationController _slideController;
+  late Animation<double> _fadeAnimation;
+  late Animation<Offset> _slideAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _fadeController = AnimationController(
+      duration: Duration(milliseconds: 1000),
+      vsync: this,
+    );
+    _slideController = AnimationController(
+      duration: Duration(milliseconds: 600),
+      vsync: this,
+    );
+
+    _fadeAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(
+      parent: _fadeController,
+      curve: Curves.easeInOut,
+    ));
+
+    _slideAnimation = Tween<Offset>(
+      begin: Offset(0, 0.2),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(
+      parent: _slideController,
+      curve: Curves.easeOutCubic,
+    ));
+
+    _fadeController.forward();
+    Future.delayed(Duration(milliseconds: 200), () {
+      _slideController.forward();
+    });
+  }
+
+  @override
+  void dispose() {
+    _fadeController.dispose();
+    _slideController.dispose();
+    super.dispose();
+  }
+
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Scaffold(
-      appBar: AppBar(
-        title: Text("Directorio"),
+      body: Container(
+        decoration: BoxDecoration(
+          color: isDark ? Color(0xFF0F172A) : Color(0xFFF8FAFC),
+        ),
+        child: SafeArea(
+          child: Column(
+            children: [
+              // Custom App Bar
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+                decoration: BoxDecoration(
+                  color: isDark
+                      ? Color(0xFF1E293B).withOpacity(0.95)
+                      : Colors.white.withOpacity(0.95),
+                  borderRadius: BorderRadius.only(
+                    bottomLeft: Radius.circular(25),
+                    bottomRight: Radius.circular(25),
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: isDark
+                          ? Colors.black.withOpacity(0.2)
+                          : Colors.black.withOpacity(0.1),
+                      blurRadius: 10,
+                      offset: Offset(0, 5),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  children: [
+                    // Back Button
+                    Container(
+                      margin: EdgeInsets.only(right: 15),
+                      child: Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(12),
+                          onTap: () => Navigator.of(context).pop(),
+                          child: Container(
+                            padding: EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: isDark
+                                  ? Color(0xFF334155)
+                                  : Color(0xFFF1F5F9),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Icon(
+                              Icons.arrow_back_rounded,
+                              color: isDark
+                                  ? Color(0xFF94A3B8)
+                                  : Color(0xFF64748B),
+                              size: 20,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    Container(
+                      padding: EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Color(0xFF8B5CF6).withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Icon(
+                        Icons.store_rounded,
+                        color: Color(0xFF8B5CF6),
+                        size: 24,
+                      ),
+                    ),
+                    SizedBox(width: 15),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            "Directorio de Sucursales",
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              color: colorScheme.onSurface,
+                            ),
+                          ),
+                          Text(
+                            "Ubicaciones y contactos",
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: isDark
+                                  ? Color(0xFF94A3B8)
+                                  : Color(0xFF6B7280),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              // Content
+              Expanded(
+                child: FadeTransition(
+                  opacity: _fadeAnimation,
+                  child: SlideTransition(
+                    position: _slideAnimation,
+                    child: Container(
+                      margin: EdgeInsets.symmetric(horizontal: 12),
+                      child: ListView(
+                        padding: EdgeInsets.only(bottom: 20),
+                        children: [
+                          _buildSectionTitle("Sucursales Culiacán", isDark),
+                          _buildContactCard("lomita@cebasic.com", "6671460879",
+                              "Plaza Lomita", "", isDark),
+                          _buildContactCard(
+                              "mgalerias@cebasic.com",
+                              "6675032726",
+                              "Modulo Galerias San Miguel",
+                              "",
+                              isDark),
+                          _buildContactCard("galerias@cebasic.com",
+                              "6671460714", "Galerias San Miguel", "", isDark),
+                          _buildContactCard(
+                              "galerias2@cebasic.com",
+                              "6671709765",
+                              "Galerias San Miguel 2",
+                              "",
+                              isDark),
+                          _buildContactCard("baurrera@cebasic.com",
+                              "6677182218", "Bodega Aurrera", "", isDark),
+                          _buildContactCard("isla@cebasic.com", "6671463981",
+                              "Isla Musala", "", isDark),
+                          _buildContactCard("pfiesta@cebasic.com", "6676483100",
+                              "Plaza Fiesta", "", isDark),
+                          _buildContactCard("sendero@cebasic.com", "6671133701",
+                              "Sendero", "", isDark),
+                          _buildContactCard("mvalle@cebasic.com", "6677215353",
+                              "Modulo Valle", "", isDark),
+                          _buildContactCard("valle@cebasic.com", "6677215784",
+                              "Plaza Valle", "", isDark),
+                          _buildContactCard("humaya@cebasic.com", "6677100956",
+                              "Plaza Humaya", "", isDark),
+                          _buildContactCard("forum@cebasic.com", "6677126617",
+                              "Forum", "", isDark),
+                          _buildContactCard("cuatrorios@cebasic.com",
+                              "6671709273", "Cuatro Rios", "", isDark),
+                          _buildContactCard("oasis@cebasic.com", "6671706357",
+                              "Paseo Oasis", "", isDark),
+                          _buildSectionTitle("Sucursales Mazatlán", isDark),
+                          _buildContactCard("patio@cebasic.com", "6699803411",
+                              "Plaza Patio", "", isDark),
+                          _buildContactCard("santarosa@cebasic.com",
+                              "6696882046", "Plaza Santa Rosa", "", isDark),
+                          _buildContactCard("galeriasmzt@cebasic.com",
+                              "6692795264", "Galerias Mazatlan", "", isDark),
+                          _buildContactCard("e10@cebasic.com", "6696889148",
+                              "Gran Plaza E10", "", isDark),
+                          _buildContactCard("granplaza@cebasic.com",
+                              "6699833485", "Gran Plaza", "", isDark),
+                          _buildSectionTitle("Reparaciones", isDark),
+                          _buildContactCard("cellfix@cebasic.com", "6699833128",
+                              "Cellfix Mzt", "", isDark),
+                          _buildContactCard("reparacionaurrera@cebasic.com",
+                              "6677182218", "Reparaciones Aurrera", "", isDark),
+                          _buildContactCard("reparacionhumaya@cebasic.com",
+                              "6677100956", "Reparaciones Humaya", "", isDark),
+                          _buildContactCard("reparacionisla@cebasic.com",
+                              "6671463981", "Reparaciones Isla", "", isDark),
+                          _buildContactCard(
+                              "reparacionsr@cebasic.com",
+                              "6696882046",
+                              "Reparaciones Plaza Santa Rosa",
+                              "",
+                              isDark),
+                          _buildContactCard(
+                              "reparacionvalle@cebasic.com",
+                              "6677215784",
+                              "Reparaciones Plaza Valle",
+                              "",
+                              isDark),
+                          _buildContactCard(
+                              "reparacionlomita@cebasic.com",
+                              "6671460879",
+                              "Reparaciones Plaza Lomita",
+                              "",
+                              isDark),
+                          _buildSectionTitle("Administrativos", isDark),
+                          _buildContactCard("director@cebasic.com", "",
+                              "Miguel Torrontegui", "", isDark),
+                          _buildContactCard("recursos@cebasic.com",
+                              "6673080900", "America Iribe", "", isDark),
+                          _buildContactCard("recursos2@cebasic.com",
+                              "6672060481", "Dalia Arce", "", isDark),
+                          _buildContactCard("finanzas@cebasic.com",
+                              "6673080900", "Finanzas", "", isDark),
+                          _buildContactCard(
+                              "contabilidad@cebasic.com",
+                              "6674310282",
+                              "Contabilidad - Arturo Carmona",
+                              "",
+                              isDark),
+                          _buildContactCard(
+                              "cadenas@cebasic.com",
+                              "",
+                              "Cadenas comerciales - Ivan Sandoval",
+                              "",
+                              isDark),
+                          _buildSectionTitle("Almacenes y Operaciones", isDark),
+                          _buildContactCard(
+                              "almacen1@cebasic.com",
+                              "6671540474",
+                              "Almacen teléfonos - Leonardo Sanchez",
+                              "",
+                              isDark),
+                          _buildContactCard(
+                              "almacen2@cebasic.com",
+                              "6671010840",
+                              "Almacen teléfonos - Juan Pablo",
+                              "",
+                              isDark),
+                          _buildContactCard(
+                              "almacen3@cebasic.com",
+                              "6672928909",
+                              "Almacen accesorios - Sofia Payan",
+                              "",
+                              isDark),
+                          _buildContactCard(
+                              "operaciones2@cebasic.com",
+                              "6674075833",
+                              "Auditoria y Operaciones - Erick Meza",
+                              "",
+                              isDark),
+                          _buildContactCard(
+                              "garantias@cebasic.com",
+                              "",
+                              "Garantias - Jorge Rojo/Saturnino Gaxiola",
+                              "",
+                              isDark),
+                          _buildContactCard("somos@cebasic.com", "6672454125",
+                              "Ecommerce - Elias Gamez", "", isDark),
+                          _buildContactCard(
+                              "mercadotecnia@cebasic.com",
+                              "6676938366",
+                              "Mercadotecnia - Cristell Gamez",
+                              "",
+                              isDark),
+                          _buildContactCard(
+                              "contacto@cebasic.com",
+                              "6672646767",
+                              "Credibasic - Manuel Bustamante",
+                              "",
+                              isDark),
+                          _buildContactCard(
+                              "telcel.basic@hotmail.com",
+                              "6672360065",
+                              "Planes Telcel - Francisco Mada",
+                              "",
+                              isDark),
+                          _buildContactCard(
+                              "artegrafica@cebasic.com",
+                              "",
+                              "Diseño Grafico - Maria Jose Gonzalez",
+                              "",
+                              isDark),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
-      body: ListView(
+    );
+  }
+
+  Widget _buildSectionTitle(String title, bool isDark) {
+    return Container(
+      margin: EdgeInsets.only(top: 20, bottom: 15),
+      padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+      decoration: BoxDecoration(
+        color: isDark
+            ? Color(0xFF1E293B).withOpacity(0.95)
+            : Colors.white.withOpacity(0.95),
+        borderRadius: BorderRadius.circular(15),
+        boxShadow: [
+          BoxShadow(
+            color: isDark
+                ? Colors.black.withOpacity(0.2)
+                : Colors.black.withOpacity(0.1),
+            blurRadius: 5,
+            offset: Offset(0, 2),
+          ),
+        ],
+        border: isDark
+            ? Border.all(
+                color: Color(0xFF334155),
+                width: 1,
+              )
+            : null,
+      ),
+      child: Row(
         children: [
-          // -Plaza Lomita: Prol. Álvaro Obregón 1796 Sur- Local 2, Colinas de San Miguel. Cp. 80228 tel. 6671460879 Correo: lomita@cebasic.com
-          // -Modulo Galerias San Miguel: Prol. Álvaro Obregón 1880 SUR-S/N, Colinas de San Miguel, 80228 Culiacán Rosales, Sin Tel. 6675032726 correo: mgalerias@cebasic.com
-          // -Galerias San Miguel:Prol. Álvaro Obregón 1880 SUR-S/N, Colinas de San Miguel, 80228 Culiacán Rosales, Sin Tel. 6671460714 correo: galerias@cebasic.com
-          // -Galerias San Miguel 3:Prol. Álvaro Obregón 1880 SUR-S/N Local 19B, Colinas de San Miguel, 80228 Culiacán Rosales, SinTel. 6671709765 correo: galerias2@cebasic.com
-          // -Bodega Aurrera:Mercado de Abastos, 80299 Culiacán Rosales, Sintel. 6677182218 correo: baurrera@cebasic.com
-          // -Isla Musala: Blvd. Isla Musalá NUM. 1479, Fracc Musalá Isla Bonita, MUSALA, 80065 Culiacán Rosales, Sin.tel. 6671463981 correo: isla@cebasic.com
-          // -Plaza Fiesta: De Los Insurgentes 1601, Centro Sinaloa, Centro, 80200 Culiacán Rosales, Sin.Tel: 6676483100 correo: pfiesta@cebasic.com
-          // -Sendero:Sendero Culiacán Boulevard José Limon, Humaya No. 2545 Local C19, C.P. 8002 Culiacán Rosales, Sin.Tel.6671133701 correo: sendero@cebasic.com
-          // -Modulo Valle:Blvd. Emiliano Zapata, Gasolinera del Valle, San Rafael, 80150 Culiacán Rosales, Sin.Tel.6677215353 correo: mvalle@cebasic.com
-          // -Plaza Valle:Blvd. Emiliano Zapata Local 4, Gasolinera del Valle, San Rafael, 80150 Culiacán Rosales, Sin.Tel. 6677215784 correo: valle@cebasic.com
-          // -Plaza Humaya:Gral. Ignacio Ramírez 1125, Jorge Almada.tel. 6677100956 Correo: humaya@cebasic.com
-          // -Plaza Forum:BLVD. JOSE, Diego Valadés Ríos 1676 PTE, Desarrollo Urbano Tres Ríos, 80060 Culiacán Rosales, Sintel. 6677126617 correo: forum@cebasic.com
-          // -Cuatro Rios-Blvd Enrique Sanchez Alonso #2079 N Local A-043A, Plaza Cuatro Rios Fracc. 3 Rios, c.p.: 80020 Tel. Correo: cuatrorios@cebasic.com
-          // -Plaza Paseo Oasis:Carretera a imala #2880 nte. Local 2, ejido tierra blanca c.p. 80014tel.6671706357 correo: oasis@cebasic.com
-          _tile("lomita@cebasic.com", "6671460879", "Plaza Lomita", ""),
-          _tile("mgalerias@cebasic.com", "6675032726",
-              "Modulo Galerias San Miguel", ""),
-          _tile(
-              "galerias@cebasic.com", "6671460714", "Galerias San Miguel", ""),
-          _tile("galerias2@cebasic.com", "6671709765", "Galerias San Miguel 2",
-              ""),
-          _tile("baurrera@cebasic.com", "6677182218", "Bodega Aurrera", ""),
-          _tile("isla@cebasic.com", "6671463981", "Isla Musala", ""),
-          _tile("pfiesta@cebasic.com", "6676483100", "Plaza Fiesta", ""),
-          _tile("sendero@cebasic.com", "6671133701", "Sendero", ""),
-          _tile("mvalle@cebasic.com", "6677215353", "Modulo Valle", ""),
-          _tile("valle@cebasic.com", "6677215784", "Plaza Valle", ""),
-          _tile("humaya@cebasic.com", "6677100956", "Plaza Humaya", ""),
-          _tile("forum@cebasic.com", "6677126617", "Forum", ""),
-          _tile("cuatrorios@cebasic.com", "6671709273", "Cuatro Rios", ""),
-          _tile("oasis@cebasic.com", "6671706357", "Paseo Oasis", ""),
-          // _tile("", "", "Mazatlan", ""),
-          // Mazatlán
-          // Plaza Patio:Carretera Internacional y Libramiento Culiacán, Local 9, C.P.82190 Mazatlán, Sin. Tel.  6699803411 Correo: patio@cebasic.com
-          // Plaza Santa Rosa: Av Sta Rosa 17301 Local 1, Valle Dorado, 82132 Mazatlán, Sin. Tel. 669 688 2046 correo: santarosa@cebasic.com
-          // Galerias MazatlánAv. De la Marina 6204 Local 6, Cp. 82103, Desarrollo residencial turistico Marina MazatlánTel. 6692795264 Correo: galeriasmzt@cebasic.com
-          // Gran Plaza E10 Av. Reforma s/n, Alameda. Local E10, 82123 Mazatlán, Sin.Tel. 6696889148 correo: E10@cebasic.com
-          // Gran plaza Av. Reforma s/n, Alameda. Local u1 y u2, 82123 Mazatlán, Sin.Tel.6699833485 correo: granplaza@cebasic.com
-          _tile("patio@cebasic.com", "6699803411", "Plaza Patio", ""),
-          _tile("santarosa@cebasic.com", "6696882046", "Plaza Santa Rosa", ""),
-          _tile(
-              "galeriasmzt@cebasic.com", "6692795264", "Galerias Mazatlan", ""),
-          _tile("e10@cebasic.com", "6696889148", "Gran Plaza E10", ""),
-          _tile("granplaza@cebasic.com", "6699833485", "Gran Plaza", ""),
-          // Reparaciones:Cellfix Mzt:tel 6699833128 correo: cellfix@cebasic.com
-          // Reparaciones Bodega Aurrera Tel. 6677182218 correo: reparacionaurrera@cebasic.com
-          // Reparaciones Plaza Humaya Tel. 6677100956 correo: reparacionhumaya@cebasic.com
-          // Reparaciones Isla: Tel. 6671463981 correo: reparacionisla@cebasic.com
-          // Reparaciones Plaza Santa Rosa: Tel. 6696882046 correo: reparacionsr@cebasic.com
-          // Reparaciones Plaza Valle: Tel. 6677215784 correo: reparacionvalle@cebasic.com
-          // Reparaciones Lomita: Tel. 667 146 0879 correo: reparacionlomita@cebasic.com
-          _tile("cellfix@cebasic.com", "6699833128", "Cellfix Mzt", ""),
-          _tile("reparacionaurrera@cebasic.com", "6677182218",
-              "Reparaciones Aurrera", ""),
-          _tile("reparacionhumaya@cebasic.com", "6677100956",
-              "Reparaciones Humaya", ""),
-          _tile("reparacionisla@cebasic.com", "6671463981", "Reparaciones Isla",
-              ""),
-          _tile("reparacionsr@cebasic.com", "6696882046",
-              "Reparaciones Plaza Santa Rosa", ""),
-          _tile("reparacionvalle@cebasic.com", "6677215784",
-              "Reparaciones Plaza Valle", ""),
-          _tile("reparacionlomita@cebasic.com", "6671460879",
-              "Reparaciones Plaza Lomita", ""),
-          // Administrativos:
-          // Director: Miguel Torrontegui Correo: director@cebasic.com
-          // Recursos Humanos:
-          // America Iribe: tel: 6673080900 correo:recursos@cebasic.com
-          // Finanzas: Tel: 6673080900 Correo: finanzas@cebasic.com
-          // Contabilidad:Arturo Carmona Tel: 6674310282 correo: contabilidad@cebasic.com
-          // Cadenas comerciales:Ivan Sandoval.correo: cadenas@cebasic.com
-          _tile("director@cebasic.com", "", "Miguel Torrontegui", ""),
-          _tile("recursos@cebasic.com", "6673080900", "America Iribe", ""),
-          _tile("recursos2@cebasic.com", "6672060481", "Dalia Arce", ""),
-          _tile("finanzas@cebasic.com", "6673080900", "Finanzas", ""),
-          _tile("contabilidad@cebasic.com", "6674310282",
-              "Contabilidad - Arturo Carmona", ""),
-          _tile("cadenas@cebasic.com", "",
-              "Cadenas comerciales - Ivan Sandoval", ""),
-
-          // Almacen 1 Leonardo Sanchez Tel: 6671540474 Correo: almacen1@cebasic.com
-          // Almacen 2 Juan Pablo Tel. 6671010840 correo: almacen2@cebasic.com
-          //Almacen 3 Sofia PayanTel. 6672928909 correo: almacen3@cebasic.com
-          // Almacen 4 Isabel Huerta Tel. 6672926900 correo: almacen4@cebasic.com
-          // Almacen 5 Yesica Cardenas Correo: almacen5@cebasic.com
-          // Auditoria:Fabiola Rodriguez correo: auditoria@cebasic.com
-          // Auditoria y Operaciones
-          // Luis Guzman correo: operaciones1@cebasic.com
-          // Erick Meza correo: operaciones2@cebasic.com
-          // Garantias:
-          // Jorge Rojo/ Saturnino Gaxiolacorreo: garantias@cebasic.com
-          // Ecommerce:
-          // Elias Gamez Tel.6672454125 correo: somos@cebasic.com
-          // Mercadotenia:
-          // Cristell GamezTel. 6676938366 correo: mercadotecnia@cebasic.com
-          // Credibasic:Manuel Bustamante Tel. 6672646767 correo: contacto@cebasic.com
-          // Planes Telcel:Francisco MadaTel.6677100956 correo: planes@cebasic.com
-          // Auxiliar Administrativo: Dalia ArceTel: 6672060481 Correo: recursos2@cebasic.com
-          // Diseño Grafico:
-          // Maria Jose Gonzalez Tel: Correo: artegrafica@cebasic.com
-          _tile("almacen1@cebasic.com", "6671540474",
-              "Almacen teléfonos - Leonardo Sanchez", ""),
-          _tile("almacen2@cebasic.com", "6671010840",
-              "Almacen teléfonos - Juan Pablo", ""),
-          _tile("almacen3@cebasic.com", "6672928909",
-              "Almacen accesorios - Sofia Payan", ""),
-          // _tile("almacen4@cebasic.com", "6672926900",
-          //     "Almacen accesorios - Isabel Huerta", ""),
-          // _tile("almacen5@cebasic.com", "",
-          //     "Almacen accesorios - Yesica Cardenas", ""),
-          // _tile(
-          //     "auditoria@cebasic.com", "", "Auditoria - Fabiola Rodriguez", ""),
-          // _tile("operaciones1@cebasic.com", "6675032666",
-          //     "Auditoria y Operaciones - Luis Guzman", ""),
-          _tile("operaciones2@cebasic.com", "6674075833",
-              "Auditoria y Operaciones - Erick Meza", ""),
-          _tile("garantias@cebasic.com", "",
-              "Garantias - Jorge Rojo/Saturnino Gaxiola", ""),
-          _tile(
-              "somos@cebasic.com", "6672454125", "Ecommerce - Elias Gamez", ""),
-          _tile("mercadotecnia@cebasic.com", "6676938366",
-              "Mercadotecnia - Cristell Gamez", ""),
-          _tile("contacto@cebasic.com", "6672646767",
-              "Credibasic - Manuel Bustamante", ""),
-          _tile("telcel.basic@hotmail.com", "6672360065",
-              "Planes Telcel - Francisco Mada", ""),
-          _tile("artegrafica@cebasic.com", "",
-              "Diseño Grafico - Maria Jose Gonzalez", ""),
-
-// OLD
-          // _tile("EXPERTOSCELULAR@HOTMAIL.COM", "6677607309",
-          //     "ALMACEN TELÉFONOS", ""),
-          // _tile("contacto@cebasic.COM", "6677607309", "Ecommerce", ""),
-          // //    _tile("BASIC.AEROPUERTO@HOTMAIL.COM", "6677122597", "AEROPUERTO", ""),
-          // _tile("HUMAYA.BASIC@HOTMAIL.COM", "6677100956", "Humaya", ""),
-          // _tile("TELCEL.BASIC@HOTMAIL.COM", "6677100956",
-          //     "Oficina Francisco Mada", ""),
-          // _tile("CELLFIX.VALLE@HOTMAIL.COM", "6677215784", "Tienda Valle", ""),
-          // _tile(
-          //     "MODULO.VALLE360@HOTMAIL.COM", "6677215353", "Módulo Valle", ""),
-          // _tile("boombox.valle@gmail.com", "6675032737", "Boombox Valle", ""),
-          // // _tile("VALLEM3.BASIC@HOTMAIL.COM", "", "BOOMBOX"),
-          // _tile("BASIC.AURRERA@HOTMAIL.COM", "6677182218",
-          //     "Bodega Aurrera Patria", ""),
-          // _tile("GALETIENDA2014@OUTLOOK.COM", "6671460714", "Galerías Tienda",
-          //     ""),
-          // _tile("Basic.fiesta@hotmail.com", "6676483100", "Plaza Fiesta", ""),
-          // _tile("sendero.cebasic@gmail.com", "6671133701", "Sendero", ""),
-
-          // _tile("CELULARBASIC_GALERIAS@HOTMAIL.COM", "6675032726",
-          //     "Galerías Kiosko", ""),
-          // _tile("BASIC.LOMITA@HOTMAIL.COM", "6671460879", "Lomita", ""),
-          // _tile("CELULARBASIC_FORUM@LIVE.COM", "6677126617", "Forum", ""),
-          // _tile("ISLA.BASIC@HOTMAIL.COM", "6671463981", "Isla Musala", ""),
-          // _tile(
-          //     "GRANPLAZAMZT.BASIC@HOTMAIL.COM", "6699833485", "Gran Plaza", ""),
-          // _tile("GRANPLAZA.CELLFIX@HOTMAIL.COM", "6699833128",
-          //     "Cellfix Mazatlán", ""),
-          // //_tile("BIGPLAZA.BASIC@HOTMAIL.COM", "6699831653", "BIG PLAZA", ""),
-          // _tile("MAZATLANE10.BASIC@HOTMAIL.COM", "6696889148", "E10", ""),
-          // _tile("SANTAROSA.BASIC@HOTMAIL.COM", "6696882046", "SANTA ROSA", ""),
-          // _tile("PATIO.BASIC@HOTMAIL.COM", "6699803411", "PATIO", ""),
-          // // _tile("", "6699683270", "TABLET CENTER"),
-          // _tile("GALERIASMAZATLAN@OUTLOOK.COM", "6692705264",
-          //     "GALERIAS MAZATLAN", ""),
-          // _tile("BASIC.LEONARDO@HOTMAIL.COM", "6671540474", "LEONARDO", ""),
-          // _tile("ARCARMU66@HOTMAIL.COM", "6674310282", "ARTURO CARMONA", ""),
-          // _tile("JUANPAZ.BASIC@GMAIL.COM", "6671010840", "JUAN PABLO", ""),
-          // _tile(
-          //     "LUISGUZMAN.BASIC@OUTLOOK.COM", "6675032666", "LUIS GUZMAN", ""),
-          // _tile("AMERICAIR.BASIC@GMAIL.COM", "6673080900", "AMERICA", ""),
-          // _tile("BUSTAMANTELUJANO@GMAIL.COM", "6672646767", "MANUEL", ""),
-          // _tile("SOFIA.BASIC@HOTMAIL.COM", "6672928909", "SOFIA", ""),
-          // _tile("ISABELH.BASIC@HOTMAIL.COM", "6672926900", "ISABEL", ""),
+          Icon(
+            Icons.category_rounded,
+            color: Color(0xFF8B5CF6),
+            size: 20,
+          ),
+          SizedBox(width: 10),
+          Text(
+            title,
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: isDark ? Color(0xFFF1F5F9) : Color(0xFF1F2937),
+            ),
+          ),
         ],
       ),
     );
   }
 
-  Card _tile(String correo, String tel, String title, String whatsapp) {
-    return Card(
-        child: Container(
-      padding: EdgeInsets.all(20),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          // Icon(Icons.store_mall_directory),
-          // SizedBox(
-          //   width: 15,
-          // ),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+  Widget _buildContactCard(
+      String correo, String tel, String title, String whatsapp, bool isDark) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Container(
+      margin: EdgeInsets.only(bottom: 12),
+      decoration: BoxDecoration(
+        color: isDark
+            ? Color(0xFF1E293B).withOpacity(0.95)
+            : Colors.white.withOpacity(0.95),
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: isDark
+                ? Colors.black.withOpacity(0.2)
+                : Colors.black.withOpacity(0.1),
+            blurRadius: 10,
+            offset: Offset(0, 5),
+          ),
+        ],
+        border: isDark
+            ? Border.all(
+                color: Color(0xFF334155),
+                width: 1,
+              )
+            : null,
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(20),
+          onTap: () {
+            // Puedes agregar funcionalidad aquí si es necesario
+          },
+          child: Padding(
+            padding: EdgeInsets.all(20),
+            child: Row(
               children: [
-                Text(
-                  title,
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                // Icon and Info
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                          color: colorScheme.onSurface,
+                        ),
+                      ),
+                      SizedBox(height: 8),
+                      Row(
+                        children: [
+                          Container(
+                            padding: EdgeInsets.all(4),
+                            decoration: BoxDecoration(
+                              color: Color(0xFF3B82F6).withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Icon(
+                              Icons.email_outlined,
+                              size: 14,
+                              color: Color(0xFF3B82F6),
+                            ),
+                          ),
+                          SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              correo.toLowerCase(),
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: isDark
+                                    ? Color(0xFF94A3B8)
+                                    : Color(0xFF6B7280),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      if (tel.isNotEmpty) ...[
+                        SizedBox(height: 6),
+                        Row(
+                          children: [
+                            Container(
+                              padding: EdgeInsets.all(4),
+                              decoration: BoxDecoration(
+                                color: Color(0xFF10B981).withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: Icon(
+                                Icons.phone_outlined,
+                                size: 14,
+                                color: Color(0xFF10B981),
+                              ),
+                            ),
+                            SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                tel,
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: isDark
+                                      ? Color(0xFF94A3B8)
+                                      : Color(0xFF6B7280),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ],
+                  ),
                 ),
-                SizedBox(
-                  height: 5,
+
+                // Action Buttons
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (whatsapp.isNotEmpty)
+                      Container(
+                        margin: EdgeInsets.only(right: 8),
+                        child: Material(
+                          color: Colors.transparent,
+                          child: InkWell(
+                            borderRadius: BorderRadius.circular(12),
+                            onTap: () => _launchWSP(tel),
+                            child: Container(
+                              padding: EdgeInsets.all(10),
+                              decoration: BoxDecoration(
+                                color: Color(0xFF25D366).withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(
+                                  color: Color(0xFF25D366).withOpacity(0.3),
+                                  width: 1,
+                                ),
+                              ),
+                              child: Icon(
+                                Icons.message,
+                                color: Color(0xFF25D366),
+                                size: 20,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    if (tel.isNotEmpty)
+                      Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(12),
+                          onTap: () => _calling(tel),
+                          child: Container(
+                            padding: EdgeInsets.all(10),
+                            decoration: BoxDecoration(
+                              color: Color(0xFF10B981).withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: Color(0xFF10B981).withOpacity(0.3),
+                                width: 1,
+                              ),
+                            ),
+                            child: Icon(
+                              Icons.phone,
+                              color: Color(0xFF10B981),
+                              size: 20,
+                            ),
+                          ),
+                        ),
+                      ),
+                  ],
                 ),
-                Text(correo.toLowerCase()),
               ],
             ),
           ),
-          whatsapp == ""
-              ? SizedBox(
-                  width: 10,
-                )
-              : IconButton(
-                  icon: Icon(Icons.phone),
-                  onPressed: () {
-                    _launchWSP(tel);
-                  },
-                ),
-          tel == ""
-              ? SizedBox(
-                  width: 10,
-                )
-              : IconButton(
-                  icon: Icon(Icons.phone),
-                  onPressed: () {
-                    _calling(tel);
-                  },
-                ),
-        ],
+        ),
       ),
-    ));
+    );
   }
 
   void _calling(numero) {
@@ -257,9 +576,7 @@ class DirectorioView extends StatelessWidget {
 
   _launchWSP(String telp) async {
     try {
-      // whatsapp://send?text=Hello World!&phone=+
       await launch('whatsapp://send?text=Hello World!&phone=+521' + telp);
-      // await FlutterLaunch.launchWathsApp(phone: "+521$telp", message: "Hello");
     } catch (e) {
       print(e);
     }

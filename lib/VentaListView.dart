@@ -26,10 +26,9 @@ class Venta {
 
   factory Venta.fromJson(Map<String, dynamic> json) {
     return Venta(
-      nfolio: json['nfolio'].toString(), // Convertir int a String
+      nfolio: json['nfolio'].toString(),
       cdescripcion: json['cdescripcion'] as String,
-      nimporte:
-          json['nimporte'].toString(), // Convertir double a String y redondear
+      nimporte: json['nimporte'].toString(),
       nimporteComision: json['nimporteComision'].toString(),
       dfecha_reg: json['dfecha_reg'] as String,
       fam: json['fam'].toString(),
@@ -42,7 +41,8 @@ class VentaListView extends StatefulWidget {
   _VentaListViewState createState() => _VentaListViewState();
 }
 
-class _VentaListViewState extends State<VentaListView> {
+class _VentaListViewState extends State<VentaListView>
+    with TickerProviderStateMixin {
   RefreshController _refreshController = RefreshController(
     initialRefresh: true,
   );
@@ -51,8 +51,53 @@ class _VentaListViewState extends State<VentaListView> {
       _comisiontotal = "",
       _name = "",
       _retardos_del_mes = "";
-  bool _isFetchingInitially =
-      true; // Nueva variable de estado para la carga inicial
+  bool _isFetchingInitially = true;
+
+  late AnimationController _fadeController;
+  late AnimationController _slideController;
+  late Animation<double> _fadeAnimation;
+  late Animation<Offset> _slideAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _fadeController = AnimationController(
+      duration: Duration(milliseconds: 1000),
+      vsync: this,
+    );
+    _slideController = AnimationController(
+      duration: Duration(milliseconds: 600),
+      vsync: this,
+    );
+
+    _fadeAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(
+      parent: _fadeController,
+      curve: Curves.easeInOut,
+    ));
+
+    _slideAnimation = Tween<Offset>(
+      begin: Offset(0, 0.2),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(
+      parent: _slideController,
+      curve: Curves.easeOutCubic,
+    ));
+
+    _fadeController.forward();
+    Future.delayed(Duration(milliseconds: 200), () {
+      _slideController.forward();
+    });
+  }
+
+  @override
+  void dispose() {
+    _fadeController.dispose();
+    _slideController.dispose();
+    super.dispose();
+  }
 
   Widget build(BuildContext context) {
     return _ventaListView(_ventas);
@@ -60,9 +105,6 @@ class _VentaListViewState extends State<VentaListView> {
 
   _onRefresh() async {
     HapticFeedback.mediumImpact();
-    // No es necesario setState para _isFetchingInitially aquí si la recarga es manual,
-    // ya que el header del SmartRefresher indicará la carga.
-    // Si es la carga inicial, _isFetchingInitially ya es true.
     try {
       await _fetchVentas();
       if (mounted) {
@@ -77,74 +119,457 @@ class _VentaListViewState extends State<VentaListView> {
   }
 
   Scaffold _ventaListView(_ventas) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Scaffold(
-      appBar: AppBar(
-        title: Text("Mi historial de ventas"),
-      ),
-      body: SmartRefresher(
-        header: CustomHeader(
-          builder: (context, mode) {
-            Widget body = Text("Jala para recargar ⬇️");
-            if (mode == RefreshStatus.idle) {
-              body = Text("Jala para recargar ⬇️");
-            } else if (mode == RefreshStatus.refreshing) {
-              body = Text("Cargando...");
-            } else if (mode == RefreshStatus.canRefresh) {
-              body = Text("Suelta para recargar ⬆️");
-            } else if (mode == RefreshStatus.completed) {
-              body = Text("Listo ✅");
-            }
-            return Container(
-              height: 60.0,
-              child: Center(
-                child: body,
-              ),
-            );
-          },
+      body: Container(
+        decoration: BoxDecoration(
+          color: isDark ? Color(0xFF0F172A) : Color(0xFFF8FAFC),
         ),
-        controller: _refreshController,
-        onRefresh: _onRefresh,
-        child: _isFetchingInitially && _ventas.isEmpty
-            ? Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
+        child: SafeArea(
+          child: Column(
+            children: [
+              // Custom App Bar
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+                decoration: BoxDecoration(
+                  color: isDark
+                      ? Color(0xFF1E293B).withOpacity(0.95)
+                      : Colors.white.withOpacity(0.95),
+                  borderRadius: BorderRadius.only(
+                    bottomLeft: Radius.circular(25),
+                    bottomRight: Radius.circular(25),
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: isDark
+                          ? Colors.black.withOpacity(0.2)
+                          : Colors.black.withOpacity(0.1),
+                      blurRadius: 10,
+                      offset: Offset(0, 5),
+                    ),
+                  ],
+                ),
+                child: Row(
                   children: [
-                    CircularProgressIndicator(),
-                    SizedBox(height: 20),
-                    Text(
-                      "Cargando información...",
-                      style: TextStyle(
-                        fontSize: 18,
-                        color: Theme.of(context)
-                            .textTheme
-                            .bodySmall
-                            ?.color
-                            ?.withOpacity(0.7),
+                    // Back Button
+                    Container(
+                      margin: EdgeInsets.only(right: 15),
+                      child: Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(12),
+                          onTap: () => Navigator.of(context).pop(),
+                          child: Container(
+                            padding: EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: isDark
+                                  ? Color(0xFF334155)
+                                  : Color(0xFFF1F5F9),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Icon(
+                              Icons.arrow_back_rounded,
+                              color: isDark
+                                  ? Color(0xFF94A3B8)
+                                  : Color(0xFF64748B),
+                              size: 20,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    Container(
+                      padding: EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Color(0xFF10B981).withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Icon(
+                        Icons.point_of_sale_rounded,
+                        color: Color(0xFF10B981),
+                        size: 24,
+                      ),
+                    ),
+                    SizedBox(width: 15),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            "Mi Historial de Ventas",
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              color: colorScheme.onSurface,
+                            ),
+                          ),
+                          Text(
+                            "Revisa tus transacciones",
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: isDark
+                                  ? Color(0xFF94A3B8)
+                                  : Color(0xFF6B7280),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ],
                 ),
-              )
-            : _ventas.isNotEmpty
-                ? ListView.builder(
-                    itemCount: _ventas.length,
-                    itemBuilder: (context, index) {
-                      return _tile(
-                          context,
-                          _ventas[index]['cdescripcion'],
-                          _ventas[index]['nimporte'].toString(),
-                          _ventas[index]['nimporteComision'].toString(),
-                          _ventas[index]['nfolio'].toString(),
-                          _ventas[index]['dfecha_reg'].toString(),
-                          _ventas[index]['fam'].toString());
-                    })
-                : Center(
-                    child: Text(
-                      "Sin ventas registradas",
-                      style: TextStyle(fontSize: 22),
+              ),
+
+              // Main Content
+              Expanded(
+                child: FadeTransition(
+                  opacity: _fadeAnimation,
+                  child: SlideTransition(
+                    position: _slideAnimation,
+                    child: Container(
+                      margin: EdgeInsets.symmetric(horizontal: 12),
+                      child: SmartRefresher(
+                        header: CustomHeader(
+                          builder: (context, mode) {
+                            Widget body = Text("Jala para recargar ⬇️");
+                            if (mode == RefreshStatus.idle) {
+                              body = Text("Jala para recargar ⬇️");
+                            } else if (mode == RefreshStatus.refreshing) {
+                              body = Text("Cargando...");
+                            } else if (mode == RefreshStatus.canRefresh) {
+                              body = Text("Suelta para recargar ⬆️");
+                            } else if (mode == RefreshStatus.completed) {
+                              body = Text("Listo ✅");
+                            }
+                            return Container(
+                              height: 60.0,
+                              child: Center(
+                                child: body,
+                              ),
+                            );
+                          },
+                        ),
+                        controller: _refreshController,
+                        onRefresh: _onRefresh,
+                        child: _isFetchingInitially && _ventas.isEmpty
+                            ? Center(
+                                child: Container(
+                                  padding: EdgeInsets.all(30),
+                                  decoration: BoxDecoration(
+                                    color: isDark
+                                        ? Color(0xFF1E293B).withOpacity(0.95)
+                                        : Colors.white.withOpacity(0.95),
+                                    borderRadius: BorderRadius.circular(20),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: isDark
+                                            ? Colors.black.withOpacity(0.2)
+                                            : Colors.black.withOpacity(0.1),
+                                        blurRadius: 10,
+                                        offset: Offset(0, 5),
+                                      ),
+                                    ],
+                                  ),
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      CircularProgressIndicator(
+                                        valueColor:
+                                            AlwaysStoppedAnimation<Color>(
+                                                Color(0xFF10B981)),
+                                      ),
+                                      SizedBox(height: 20),
+                                      Text(
+                                        "Cargando información...",
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w500,
+                                          color: colorScheme.onSurface,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              )
+                            : _ventas.isNotEmpty
+                                ? ListView.builder(
+                                    padding:
+                                        EdgeInsets.only(top: 30, bottom: 20),
+                                    itemCount: _ventas.length,
+                                    itemBuilder: (context, index) {
+                                      return _buildVentaCard(
+                                        context,
+                                        _ventas[index]['cdescripcion'],
+                                        _ventas[index]['nimporte'].toString(),
+                                        _ventas[index]['nimporteComision']
+                                            .toString(),
+                                        _ventas[index]['nfolio'].toString(),
+                                        _ventas[index]['dfecha_reg'].toString(),
+                                        _ventas[index]['fam'].toString(),
+                                        isDark,
+                                      );
+                                    })
+                                : Center(
+                                    child: Container(
+                                      padding: EdgeInsets.all(30),
+                                      decoration: BoxDecoration(
+                                        color: isDark
+                                            ? Color(0xFF1E293B)
+                                                .withOpacity(0.95)
+                                            : Colors.white.withOpacity(0.95),
+                                        borderRadius: BorderRadius.circular(20),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: isDark
+                                                ? Colors.black.withOpacity(0.2)
+                                                : Colors.black.withOpacity(0.1),
+                                            blurRadius: 10,
+                                            offset: Offset(0, 5),
+                                          ),
+                                        ],
+                                      ),
+                                      child: Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Icon(
+                                            Icons.receipt_long_outlined,
+                                            size: 60,
+                                            color: isDark
+                                                ? Color(0xFF94A3B8)
+                                                : Color(0xFF6B7280),
+                                          ),
+                                          SizedBox(height: 20),
+                                          Text(
+                                            "Sin ventas registradas",
+                                            style: TextStyle(
+                                              fontSize: 18,
+                                              fontWeight: FontWeight.bold,
+                                              color: colorScheme.onSurface,
+                                            ),
+                                          ),
+                                          SizedBox(height: 10),
+                                          Text(
+                                            "No se encontraron transacciones",
+                                            style: TextStyle(
+                                              fontSize: 14,
+                                              color: isDark
+                                                  ? Color(0xFF94A3B8)
+                                                  : Color(0xFF6B7280),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                      ),
                     ),
                   ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildVentaCard(
+    BuildContext context,
+    String title,
+    String venta,
+    String comision,
+    String folio,
+    String dfecha_reg,
+    String familia,
+    bool isDark,
+  ) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Container(
+      margin: EdgeInsets.only(bottom: 12),
+      decoration: BoxDecoration(
+        color: isDark
+            ? Color(0xFF1E293B).withOpacity(0.95)
+            : Colors.white.withOpacity(0.95),
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: isDark
+                ? Colors.black.withOpacity(0.2)
+                : Colors.black.withOpacity(0.1),
+            blurRadius: 10,
+            offset: Offset(0, 5),
+          ),
+        ],
+        border: isDark
+            ? Border.all(
+                color: Color(0xFF334155),
+                width: 1,
+              )
+            : null,
+      ),
+      child: Padding(
+        padding: EdgeInsets.all(16),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Folio Section
+            Container(
+              padding: EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Color(0xFF3B82F6).withOpacity(0.1),
+                borderRadius: BorderRadius.circular(15),
+                border: Border.all(
+                  color: Color(0xFF3B82F6).withOpacity(0.3),
+                  width: 1,
+                ),
+              ),
+              child: Column(
+                children: [
+                  Icon(
+                    Icons.receipt_long_rounded,
+                    color: Color(0xFF3B82F6),
+                    size: 24,
+                  ),
+                  SizedBox(height: 8),
+                  Text(
+                    "Folio",
+                    style: TextStyle(
+                      fontSize: 10,
+                      color: isDark ? Color(0xFF94A3B8) : Color(0xFF6B7280),
+                    ),
+                  ),
+                  Text(
+                    folio,
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF3B82F6),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            SizedBox(width: 16),
+
+            // Content Section
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: colorScheme.onSurface,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  SizedBox(height: 10),
+                  Row(
+                    children: [
+                      Container(
+                        padding: EdgeInsets.all(6),
+                        decoration: BoxDecoration(
+                          color: isDark ? Color(0xFF334155) : Color(0xFFF3F4F6),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Icon(
+                          Icons.access_time_rounded,
+                          size: 14,
+                          color: isDark ? Color(0xFF94A3B8) : Color(0xFF6B7280),
+                        ),
+                      ),
+                      SizedBox(width: 8),
+                      Text(
+                        formatFecha(dfecha_reg),
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: isDark ? Color(0xFF94A3B8) : Color(0xFF6B7280),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            SizedBox(width: 16),
+
+            // Amounts Section
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                if (double.parse(comision).round() != 0)
+                  Container(
+                    padding: EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: Color(0xFF10B981).withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
+                        color: Color(0xFF10B981).withOpacity(0.3),
+                        width: 1,
+                      ),
+                    ),
+                    child: Column(
+                      children: [
+                        Text(
+                          "\$" + double.parse(comision).round().toString(),
+                          style: TextStyle(
+                            color: Color(0xFF10B981),
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
+                          ),
+                        ),
+                        Text(
+                          "Comisión",
+                          style: TextStyle(
+                            color: Color(0xFF10B981),
+                            fontSize: 9,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                if (double.parse(comision).round() != 0) SizedBox(height: 8),
+                Container(
+                  padding: EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: Color(0xFFF59E0B).withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(
+                      color: Color(0xFFF59E0B).withOpacity(0.3),
+                      width: 1,
+                    ),
+                  ),
+                  child: Column(
+                    children: [
+                      Text(
+                        "\$" + double.parse(venta).round().toString(),
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                          color: Color(0xFFF59E0B),
+                        ),
+                      ),
+                      Text(
+                        "Venta",
+                        style: TextStyle(
+                          fontSize: 9,
+                          fontWeight: FontWeight.w500,
+                          color: Color(0xFFF59E0B),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -179,7 +604,6 @@ class _VentaListViewState extends State<VentaListView> {
             _ventas = jsonResponse['venta'];
             _name = jsonResponse['name'] ?? '';
             if (_isFetchingInitially) _isFetchingInitially = false;
-            // HapticFeedback.mediumImpact(); // Ya está en _onRefresh
           });
         }
 
@@ -199,12 +623,9 @@ class _VentaListViewState extends State<VentaListView> {
       if (mounted) {
         setState(() {
           if (_isFetchingInitially) _isFetchingInitially = false;
-          // Opcionalmente, limpiar _ventas si falló la carga
-          // _ventas = [];
         });
       }
-      throw Exception(
-          'Failed to load jobs from API: $e'); // Relanzar para que _onRefresh lo maneje
+      throw Exception('Failed to load jobs from API: $e');
     }
   }
 
@@ -236,274 +657,12 @@ class _VentaListViewState extends State<VentaListView> {
       String minuto = dateTime.minute.toString().padLeft(2, '0');
       return '$dia/$mes/$anio $hora:$minuto';
     } catch (e) {
-      // Si hay un error al parsear, devuelve la fecha original o un mensaje de error
       print('Error al formatear fecha: $e');
-      // Intenta con el formato anterior si el nuevo falla, por si acaso.
       var arr = fecha.split('.');
       if (arr.isNotEmpty) {
         return arr[0];
       }
-      return fecha; // o 'Fecha inválida'
+      return fecha;
     }
   }
-
-  Card _tile(BuildContext context, String title, String venta, String comision,
-      String folio, String dfecha_reg, String familia) {
-    final brightness =
-        Theme.of(context).brightness; // Determinar el brillo actual
-
-    // Definir colores para modo claro y oscuro
-    final Color folioIconColor =
-        brightness == Brightness.dark ? Colors.blueGrey[200]! : Colors.blueGrey;
-    final Color folioTextColor =
-        brightness == Brightness.dark ? Colors.blueGrey[200]! : Colors.blueGrey;
-    final Color folioNumberColor = brightness == Brightness.dark
-        ? Colors.blueGrey[100]!
-        : Colors.blueGrey[700]!;
-
-    final Color dateIconColor =
-        brightness == Brightness.dark ? Colors.grey[400]! : Colors.grey[600]!;
-    final Color dateTextColor =
-        brightness == Brightness.dark ? Colors.grey[300]! : Colors.grey[700]!;
-
-    // Colores para Comisión basados en AltaComisionListView (verde)
-    final Color commissionAmountColor = brightness == Brightness.dark
-        ? Colors.greenAccent[400]!
-        : Colors.green; // Verde para modo claro
-    final Color commissionTextColor = brightness == Brightness.dark
-        ? Colors.greenAccent[200]!
-        : Colors.green[700]!; // Verde más oscuro para texto en modo claro
-
-    // Colores para Venta basados en el "Precio" de AltaComisionListView (verde)
-    final Color saleAmountColor = brightness == Brightness.dark
-        ? const Color.fromARGB(255, 132, 135, 134)!
-        : Colors.green; // Verde para modo claro
-    final Color saleTextColor = brightness == Brightness.dark
-        ? Colors.greenAccent[200]!
-        : Colors.green[700]!; // Verde más oscuro para texto en modo claro
-
-    final Color cardBackgroundColor =
-        brightness == Brightness.dark ? Colors.grey[900]! : Colors.white;
-
-    return Card(
-      color: cardBackgroundColor,
-      margin: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      elevation: 3,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Padding(
-        padding: EdgeInsets.all(16),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Columna Izquierda: Folio
-            Column(
-              mainAxisAlignment:
-                  MainAxisAlignment.center, // Centrar verticalmente
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Icon(Icons.receipt_long, color: folioIconColor, size: 28),
-                SizedBox(height: 4),
-                Text("Folio",
-                    style: TextStyle(fontSize: 10, color: folioTextColor)),
-                Text(
-                  folio,
-                  style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.bold,
-                      color: folioNumberColor),
-                ),
-              ],
-            ),
-            SizedBox(width: 16),
-            // Columna Central: Descripción y Fecha (Expandida)
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title, // cdescripcion
-                    style: TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight
-                            .w500), // Se mantiene, debería adaptarse al tema
-                    maxLines: 3,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  SizedBox(height: 8),
-                  Row(
-                    children: [
-                      Icon(Icons.access_time, size: 14, color: dateIconColor),
-                      SizedBox(width: 4),
-                      Text(
-                        formatFecha(dfecha_reg),
-                        style: TextStyle(fontSize: 12, color: dateTextColor),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-            SizedBox(width: 16),
-            // Columna Derecha: Importes
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              mainAxisAlignment:
-                  MainAxisAlignment.center, // Centrar verticalmente
-              children: [
-                if (double.parse(comision).round() != 0)
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Text(
-                        "\$" + double.parse(comision).round().toString(),
-                        style: TextStyle(
-                          color: commissionAmountColor,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                        ),
-                      ),
-                      Text(
-                        "Comisión",
-                        style: TextStyle(
-                          color: commissionTextColor,
-                          fontSize: 10,
-                        ),
-                      ),
-                      SizedBox(height: 8),
-                    ],
-                  ),
-                Text(
-                  "\$" + double.parse(venta).round().toString(),
-                  style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                      color: saleAmountColor),
-                ),
-                Text(
-                  "Venta",
-                  style: TextStyle(fontSize: 10, color: saleAmountColor),
-                ),
-              ],
-            )
-          ],
-        ),
-      ),
-    );
-  }
-
-  Card _resumen(String title) => Card(
-          child: Container(
-        padding: EdgeInsets.all(20),
-        child: Column(
-          children: [
-            // new Container(
-            //     width: 120.0,
-            //     height: 120.0,
-            //     decoration: new BoxDecoration(
-            //         shape: BoxShape.circle,
-            //         image: new DecorationImage(
-            //             fit: BoxFit.fill,
-            //             image: AssetImage('images/userblank.png')))),
-            SizedBox(height: 5),
-            new Text(
-              title,
-              // textScaleFactor: 1.5,
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24),
-            ),
-            SizedBox(height: 10),
-            _retardos_del_mes.compareTo("0") > 0
-                ? retardosLabel()
-                : SizedBox(height: 0),
-            // Container(
-            //   child: Text(
-            //     "Resumen",
-            //     // overflow: TextOverflow.fade,
-            //     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24),
-            //   ),
-            // ),
-            // SizedBox(height: 8),
-            Text(
-              "\$" + double.parse(_comisiontotal).round().toString(),
-              // rng.nextInt(100).toString(),
-              style: TextStyle(
-                  color: Colors.green,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 35),
-            ),
-            Text(
-              "Comisión",
-              // rng.nextInt(100).toString(),
-              style: TextStyle(
-                  color: Colors.green,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 23),
-            ),
-            SizedBox(height: 8),
-            Text("Venta \$" + double.parse(_ventatotal).round().toString(),
-                // rng.nextInt(100).toString(),
-                style: TextStyle(fontSize: 20)),
-          ],
-        ),
-      ));
-  Column retardosLabel() {
-    return Column(
-      children: [
-        Chip(
-          padding: EdgeInsets.all(0),
-          backgroundColor: Colors.red,
-          label: new Text(
-            "Retardos:" + _retardos_del_mes,
-            // textScaleFactor: 1.5,
-            style: TextStyle(
-                fontWeight: FontWeight.bold, fontSize: 22, color: Colors.white),
-          ),
-        ),
-        SizedBox(height: 0)
-      ],
-    );
-  }
-
-  Card _resumenVacio(String title) => Card(
-          child: Container(
-        padding: EdgeInsets.all(20),
-        child: Column(
-          children: [
-            new Container(
-                width: 120.0,
-                height: 120.0,
-                decoration: new BoxDecoration(
-                    shape: BoxShape.circle,
-                    image: new DecorationImage(
-                        fit: BoxFit.fill,
-                        image: AssetImage('images/userblank.png')))),
-            SizedBox(height: 8),
-            new Text(
-              title,
-              // textScaleFactor: 1.5,
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 27),
-            ),
-            SizedBox(height: 8),
-            // Container(
-            //   child: Text(
-            //     "Resumen",
-            //     // overflow: TextOverflow.fade,
-            //     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24),
-            //   ),
-            // ),
-            // SizedBox(height: 8),
-            Text(
-              "Comisión \$0",
-              // rng.nextInt(100).toString(),
-              style: TextStyle(
-                  color: Colors.green,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 25),
-            ),
-            SizedBox(height: 8),
-            Text("Venta \$0",
-                // rng.nextInt(100).toString(),
-                style: TextStyle(fontSize: 20)),
-          ],
-        ),
-      ));
 }
