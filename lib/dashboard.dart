@@ -11,6 +11,7 @@ import 'dart:math';
 import 'VentaListView.dart';
 import 'DirectorioView.dart';
 import 'RastreoDeSubcodigos.dart';
+import 'AIBotView.dart';
 import 'widgets/barcode_icon.dart';
 
 class Dashboard extends StatefulWidget {
@@ -23,6 +24,7 @@ class _DashboardState extends State<Dashboard> with TickerProviderStateMixin {
   late AnimationController _slideController;
   late Animation<double> _fadeAnimation;
   late Animation<Offset> _slideAnimation;
+  bool _isAdmin = false;
 
   @override
   void initState() {
@@ -56,6 +58,8 @@ class _DashboardState extends State<Dashboard> with TickerProviderStateMixin {
     Future.delayed(Duration(milliseconds: 200), () {
       _slideController.forward();
     });
+
+    _checkAdminStatus();
   }
 
   @override
@@ -63,6 +67,13 @@ class _DashboardState extends State<Dashboard> with TickerProviderStateMixin {
     _fadeController.dispose();
     _slideController.dispose();
     super.dispose();
+  }
+
+  Future<void> _checkAdminStatus() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _isAdmin = prefs.getString('admin') == '1';
+    });
   }
 
   Widget build(BuildContext context) {
@@ -177,6 +188,20 @@ class _DashboardState extends State<Dashboard> with TickerProviderStateMixin {
                         child: ListView(
                           padding: EdgeInsets.only(top: 20, bottom: 20),
                           children: [
+                            // Bot de IA - Solo para administradores
+                            if (_isAdmin)
+                              _buildMenuCard(
+                                context: context,
+                                title: "Asistente IA (beta)",
+                                subtitle: "Chat inteligente para consultas",
+                                icon: Icons.smart_toy_rounded,
+                                color: Color(0xFF6366F1),
+                                onTap: () => _navigateToNextScreen(
+                                  context,
+                                  AIBotView(),
+                                ),
+                                isDark: isDark,
+                              ),
                             _buildMenuCard(
                               context: context,
                               title: "Buscar artículos",
