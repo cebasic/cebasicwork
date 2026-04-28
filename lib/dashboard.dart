@@ -1,13 +1,8 @@
-import 'dart:convert';
-import 'dart:io';
 import 'package:cebasicwork/AltaComisionListView.dart';
 
 import 'BuscadorListView.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:pull_to_refresh/pull_to_refresh.dart';
-import 'package:http/http.dart' as http;
-import 'dart:math';
 import 'VentaListView.dart';
 import 'DirectorioView.dart';
 import 'RastreoDeSubcodigos.dart';
@@ -24,7 +19,6 @@ class _DashboardState extends State<Dashboard> with TickerProviderStateMixin {
   late AnimationController _slideController;
   late Animation<double> _fadeAnimation;
   late Animation<Offset> _slideAnimation;
-  bool _isAdmin = false;
 
   @override
   void initState() {
@@ -59,7 +53,7 @@ class _DashboardState extends State<Dashboard> with TickerProviderStateMixin {
       _slideController.forward();
     });
 
-    _checkAdminStatus();
+    // No es necesario comprobar admin para el chat; se muestra a todos
   }
 
   @override
@@ -69,12 +63,7 @@ class _DashboardState extends State<Dashboard> with TickerProviderStateMixin {
     super.dispose();
   }
 
-  Future<void> _checkAdminStatus() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    setState(() {
-      _isAdmin = prefs.getString('admin') == '1';
-    });
-  }
+  // Eliminado el chequeo de admin para permitir acceso general al chat
 
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -85,7 +74,7 @@ class _DashboardState extends State<Dashboard> with TickerProviderStateMixin {
       child: Scaffold(
         body: Container(
           decoration: BoxDecoration(
-            color: isDark ? Color(0xFF0F172A) : Color(0xFFF8FAFC),
+            color: isDark ? Colors.black : Color(0xFFF8FAFC),
           ),
           child: SafeArea(
             child: Column(
@@ -95,7 +84,7 @@ class _DashboardState extends State<Dashboard> with TickerProviderStateMixin {
                   padding: EdgeInsets.symmetric(horizontal: 20, vertical: 15),
                   decoration: BoxDecoration(
                     color: isDark
-                        ? Color(0xFF1E293B).withOpacity(0.95)
+                        ? Color(0xFF111111).withOpacity(0.95)
                         : Colors.white.withOpacity(0.95),
                     borderRadius: BorderRadius.only(
                       bottomLeft: Radius.circular(25),
@@ -188,20 +177,19 @@ class _DashboardState extends State<Dashboard> with TickerProviderStateMixin {
                         child: ListView(
                           padding: EdgeInsets.only(top: 20, bottom: 20),
                           children: [
-                            // Bot de IA - Solo para administradores
-                            if (_isAdmin)
-                              _buildMenuCard(
-                                context: context,
-                                title: "Asistente IA (beta)",
-                                subtitle: "Chat inteligente para consultas",
-                                icon: Icons.smart_toy_rounded,
-                                color: Color(0xFF6366F1),
-                                onTap: () => _navigateToNextScreen(
-                                  context,
-                                  AIBotView(),
-                                ),
-                                isDark: isDark,
+                            // Bot de IA
+                            _buildMenuCard(
+                              context: context,
+                              title: "Asistente IA (beta)",
+                              subtitle: "Chat inteligente para consultas",
+                              icon: Icons.smart_toy_rounded,
+                              color: Color(0xFF6366F1),
+                              onTap: () => _navigateToNextScreen(
+                                context,
+                                AIBotView(),
                               ),
+                              isDark: isDark,
+                            ),
                             _buildMenuCard(
                               context: context,
                               title: "Buscar artículos",
@@ -296,7 +284,7 @@ class _DashboardState extends State<Dashboard> with TickerProviderStateMixin {
       margin: EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
         color: isDark
-            ? Color(0xFF1E293B).withOpacity(0.95)
+            ? Color(0xFF111111).withOpacity(0.95)
             : Colors.white.withOpacity(0.95),
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
@@ -310,7 +298,7 @@ class _DashboardState extends State<Dashboard> with TickerProviderStateMixin {
         ],
         border: isDark
             ? Border.all(
-                color: Color(0xFF334155),
+                color: Color(0xFF1A1A1A),
                 width: 1,
               )
             : null,
@@ -419,11 +407,11 @@ class _DashboardState extends State<Dashboard> with TickerProviderStateMixin {
           child: Container(
             padding: EdgeInsets.all(30),
             decoration: BoxDecoration(
-              color: isDark ? Color(0xFF1E293B) : Colors.white,
+              color: isDark ? Color(0xFF111111) : Colors.white,
               borderRadius: BorderRadius.circular(20),
               border: isDark
                   ? Border.all(
-                      color: Color(0xFF334155),
+                      color: Color(0xFF1A1A1A),
                       width: 1,
                     )
                   : null,
@@ -475,7 +463,7 @@ class _DashboardState extends State<Dashboard> with TickerProviderStateMixin {
                             padding: EdgeInsets.symmetric(vertical: 12),
                             decoration: BoxDecoration(
                               color: isDark
-                                  ? Color(0xFF334155)
+                                  ? Color(0xFF1A1A1A)
                                   : Color(0xFFF3F4F6),
                               borderRadius: BorderRadius.circular(12),
                             ),

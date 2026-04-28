@@ -193,7 +193,7 @@ class _AIBotViewState extends State<AIBotView> with TickerProviderStateMixin {
             ),
           ],
         ),
-        backgroundColor: isDark ? Color(0xFF1E293B) : Colors.white,
+        backgroundColor: isDark ? Color(0xFF111111) : Colors.white,
         elevation: 0,
         iconTheme: IconThemeData(
           color: colorScheme.onSurface,
@@ -203,7 +203,7 @@ class _AIBotViewState extends State<AIBotView> with TickerProviderStateMixin {
         opacity: _fadeAnimation,
         child: Container(
           decoration: BoxDecoration(
-            color: isDark ? Color(0xFF0F172A) : Color(0xFFF8FAFC),
+            color: isDark ? Colors.black : Color(0xFFF8FAFC),
           ),
           child: Column(
             children: [
@@ -226,10 +226,10 @@ class _AIBotViewState extends State<AIBotView> with TickerProviderStateMixin {
               Container(
                 padding: EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: isDark ? Color(0xFF1E293B) : Colors.white,
+                  color: isDark ? Color(0xFF111111) : Colors.white,
                   border: Border(
                     top: BorderSide(
-                      color: isDark ? Color(0xFF334155) : Color(0xFFE5E7EB),
+                      color: isDark ? Color(0xFF1A1A1A) : Color(0xFFE5E7EB),
                       width: 1,
                     ),
                   ),
@@ -239,7 +239,7 @@ class _AIBotViewState extends State<AIBotView> with TickerProviderStateMixin {
                     Expanded(
                       child: Container(
                         decoration: BoxDecoration(
-                          color: isDark ? Color(0xFF334155) : Color(0xFFF9FAFB),
+                          color: isDark ? Color(0xFF1A1A1A) : Color(0xFFF9FAFB),
                           borderRadius: BorderRadius.circular(25),
                           border: Border.all(
                             color:
@@ -336,7 +336,7 @@ class _AIBotViewState extends State<AIBotView> with TickerProviderStateMixin {
               decoration: BoxDecoration(
                 color: message.isUser
                     ? Color(0xFF6366F1)
-                    : (isDark ? Color(0xFF334155) : Color(0xFFF3F4F6)),
+                    : (isDark ? Color(0xFF1A1A1A) : Color(0xFFF3F4F6)),
                 borderRadius: BorderRadius.circular(20),
                 border: !message.isUser
                     ? Border.all(
@@ -541,7 +541,7 @@ class _AIBotViewState extends State<AIBotView> with TickerProviderStateMixin {
           Container(
             padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
-              color: isDark ? Color(0xFF334155) : Color(0xFFF3F4F6),
+              color: isDark ? Color(0xFF1A1A1A) : Color(0xFFF3F4F6),
               borderRadius: BorderRadius.circular(20),
               border: Border.all(
                 color: isDark ? Color(0xFF475569) : Color(0xFFE5E7EB),
@@ -675,7 +675,7 @@ class _CsvPreviewScreenState extends State<CsvPreviewScreen> {
             fontWeight: FontWeight.bold,
           ),
         ),
-        backgroundColor: isDark ? Color(0xFF1E293B) : Colors.white,
+        backgroundColor: isDark ? Color(0xFF111111) : Colors.white,
         elevation: 0,
         iconTheme: IconThemeData(
           color: colorScheme.onSurface,
@@ -694,7 +694,7 @@ class _CsvPreviewScreenState extends State<CsvPreviewScreen> {
         ],
       ),
       body: Container(
-        color: isDark ? Color(0xFF0F172A) : Color(0xFFF8FAFC),
+        color: isDark ? Colors.black : Color(0xFFF8FAFC),
         child: _buildBody(isDark),
       ),
     );
@@ -787,10 +787,10 @@ class _CsvPreviewScreenState extends State<CsvPreviewScreen> {
         Container(
           padding: EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: isDark ? Color(0xFF1E293B) : Colors.white,
+            color: isDark ? Color(0xFF111111) : Colors.white,
             border: Border(
               bottom: BorderSide(
-                color: isDark ? Color(0xFF334155) : Color(0xFFE5E7EB),
+                color: isDark ? Color(0xFF1A1A1A) : Color(0xFFE5E7EB),
                 width: 1,
               ),
             ),

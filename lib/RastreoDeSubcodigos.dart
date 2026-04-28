@@ -157,7 +157,7 @@ class _RastreoDeSubcodigosState extends State<RastreoDeSubcodigos>
     return Scaffold(
       body: Container(
         decoration: BoxDecoration(
-          color: isDark ? Color(0xFF0F172A) : Color(0xFFF8FAFC),
+          color: isDark ? Colors.black : Color(0xFFF8FAFC),
         ),
         child: SafeArea(
           child: Column(
@@ -167,7 +167,7 @@ class _RastreoDeSubcodigosState extends State<RastreoDeSubcodigos>
                 padding: EdgeInsets.symmetric(horizontal: 20, vertical: 15),
                 decoration: BoxDecoration(
                   color: isDark
-                      ? Color(0xFF1E293B).withOpacity(0.95)
+                      ? Color(0xFF111111).withOpacity(0.95)
                       : Colors.white.withOpacity(0.95),
                   borderRadius: BorderRadius.only(
                     bottomLeft: Radius.circular(25),
@@ -197,7 +197,7 @@ class _RastreoDeSubcodigosState extends State<RastreoDeSubcodigos>
                             padding: EdgeInsets.all(8),
                             decoration: BoxDecoration(
                               color: isDark
-                                  ? Color(0xFF334155)
+                                  ? Color(0xFF1A1A1A)
                                   : Color(0xFFF1F5F9),
                               borderRadius: BorderRadius.circular(12),
                             ),
@@ -217,7 +217,7 @@ class _RastreoDeSubcodigosState extends State<RastreoDeSubcodigos>
                       child: Container(
                         decoration: BoxDecoration(
                           color: isDark
-                              ? Color(0xFF334155).withOpacity(0.5)
+                              ? Color(0xFF1A1A1A).withOpacity(0.5)
                               : Color(0xFFF3F4F6),
                           borderRadius: BorderRadius.circular(15),
                           border: Border.all(
@@ -469,7 +469,7 @@ class _RastreoDeSubcodigosState extends State<RastreoDeSubcodigos>
       margin: EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
         color: isDark
-            ? Color(0xFF1E293B).withOpacity(0.95)
+            ? Color(0xFF111111).withOpacity(0.95)
             : Colors.white.withOpacity(0.95),
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
@@ -483,7 +483,7 @@ class _RastreoDeSubcodigosState extends State<RastreoDeSubcodigos>
         ],
         border: isDark
             ? Border.all(
-                color: Color(0xFF334155),
+                color: Color(0xFF1A1A1A),
                 width: 1,
               )
             : null,
@@ -644,11 +644,11 @@ class _RastreoDeSubcodigosState extends State<RastreoDeSubcodigos>
           child: Container(
             padding: EdgeInsets.all(30),
             decoration: BoxDecoration(
-              color: isDark ? Color(0xFF1E293B) : Colors.white,
+              color: isDark ? Color(0xFF111111) : Colors.white,
               borderRadius: BorderRadius.circular(20),
               border: isDark
                   ? Border.all(
-                      color: Color(0xFF334155),
+                      color: Color(0xFF1A1A1A),
                       width: 1,
                     )
                   : null,
@@ -755,8 +755,8 @@ class _ScannerPageState extends State<_ScannerPage> {
             end: Alignment.bottomRight,
             colors: isDark
                 ? [
-                    Color(0xFF0F172A),
-                    Color(0xFF1E293B),
+                    Colors.black,
+                    Color(0xFF0B0B0B),
                   ]
                 : [
                     Color(0xFFEF4444),

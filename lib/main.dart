@@ -43,19 +43,19 @@ class MyApp extends StatelessWidget {
       darkTheme: ThemeData(
         brightness: Brightness.dark,
         fontFamily: 'SF Pro Display',
-        scaffoldBackgroundColor: Color(0xFF0F172A),
-        cardColor: Color(0xFF1E293B),
-        dialogBackgroundColor: Color(0xFF1E293B),
+        scaffoldBackgroundColor: Colors.black,
+        cardColor: Color(0xFF111111),
+        dialogBackgroundColor: Color(0xFF111111),
         colorScheme: ColorScheme.dark(
           primary: Color(0xFF10B981),
           secondary: Color(0xFF3B82F6),
-          surface: Color(0xFF1E293B),
-          background: Color(0xFF0F172A),
+          surface: Color(0xFF111111),
+          background: Colors.black,
           error: Color(0xFFEF4444),
           onPrimary: Colors.white,
           onSecondary: Colors.white,
-          onSurface: Color(0xFFF1F5F9),
-          onBackground: Color(0xFFF1F5F9),
+          onSurface: Color(0xFFE5E7EB),
+          onBackground: Color(0xFFE5E7EB),
           onError: Colors.white,
         ),
       ),
@@ -135,9 +135,9 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
             end: Alignment.bottomRight,
             colors: isDark
                 ? [
-                    Color(0xFF0F172A),
-                    Color(0xFF1E293B),
-                    Color(0xFF334155),
+                    Colors.black,
+                    Color(0xFF0B0B0B),
+                    Color(0xFF111111),
                   ]
                 : [
                     Color(0xFF1E3A8A),
@@ -191,7 +191,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                       padding: EdgeInsets.all(40),
                       decoration: BoxDecoration(
                         color: isDark
-                            ? Color(0xFF1E293B).withOpacity(0.95)
+                            ? Color(0xFF111111).withOpacity(0.95)
                             : Colors.white.withOpacity(0.95),
                         borderRadius: BorderRadius.circular(25),
                         boxShadow: [
@@ -205,7 +205,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                         ],
                         border: isDark
                             ? Border.all(
-                                color: Color(0xFF334155),
+                                color: Color(0xFF1A1A1A),
                                 width: 1,
                               )
                             : null,
@@ -293,12 +293,12 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                             padding: EdgeInsets.all(15),
                             decoration: BoxDecoration(
                               color: isDark
-                                  ? Color(0xFF334155)
+                                  ? Color(0xFF1A1A1A)
                                   : Color(0xFFF3F4F6),
                               borderRadius: BorderRadius.circular(12),
                               border: isDark
                                   ? Border.all(
-                                      color: Color(0xFF475569),
+                                      color: Color(0xFF2A2A2A),
                                       width: 1,
                                     )
                                   : null,
@@ -344,7 +344,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                     child: Container(
                       padding: EdgeInsets.all(30),
                       decoration: BoxDecoration(
-                        color: isDark ? Color(0xFF1E293B) : Colors.white,
+                        color: isDark ? Color(0xFF111111) : Colors.white,
                         borderRadius: BorderRadius.circular(15),
                         boxShadow: [
                           BoxShadow(
@@ -356,7 +356,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                         ],
                         border: isDark
                             ? Border.all(
-                                color: Color(0xFF334155),
+                                color: Color(0xFF1A1A1A),
                                 width: 1,
                               )
                             : null,
@@ -401,10 +401,10 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   }) {
     return Container(
       decoration: BoxDecoration(
-        color: isDark ? Color(0xFF334155) : Color(0xFFF9FAFB),
+        color: isDark ? Color(0xFF1A1A1A) : Color(0xFFF9FAFB),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: isDark ? Color(0xFF475569) : Color(0xFFE5E7EB),
+          color: isDark ? Color(0xFF2A2A2A) : Color(0xFFE5E7EB),
           width: 1,
         ),
       ),
@@ -576,11 +576,11 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
           child: Container(
             padding: EdgeInsets.all(30),
             decoration: BoxDecoration(
-              color: isDark ? Color(0xFF1E293B) : Colors.white,
+              color: isDark ? Color(0xFF111111) : Colors.white,
               borderRadius: BorderRadius.circular(20),
               border: isDark
                   ? Border.all(
-                      color: Color(0xFF334155),
+                      color: Color(0xFF1A1A1A),
                       width: 1,
                     )
                   : null,
