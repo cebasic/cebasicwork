@@ -63,7 +63,7 @@ class _DirectorioViewState extends State<DirectorioView>
     return Scaffold(
       body: Container(
         decoration: BoxDecoration(
-          color: isDark ? Color(0xFF0F172A) : Color(0xFFF8FAFC),
+          color: isDark ? Colors.black : Color(0xFFF8FAFC),
         ),
         child: SafeArea(
           child: Column(
@@ -73,7 +73,7 @@ class _DirectorioViewState extends State<DirectorioView>
                 padding: EdgeInsets.symmetric(horizontal: 20, vertical: 15),
                 decoration: BoxDecoration(
                   color: isDark
-                      ? Color(0xFF1E293B).withOpacity(0.95)
+                      ? Color(0xFF111111).withOpacity(0.95)
                       : Colors.white.withOpacity(0.95),
                   borderRadius: BorderRadius.only(
                     bottomLeft: Radius.circular(25),
@@ -103,7 +103,7 @@ class _DirectorioViewState extends State<DirectorioView>
                             padding: EdgeInsets.all(8),
                             decoration: BoxDecoration(
                               color: isDark
-                                  ? Color(0xFF334155)
+                                  ? Color(0xFF1A1A1A)
                                   : Color(0xFFF1F5F9),
                               borderRadius: BorderRadius.circular(12),
                             ),
@@ -342,7 +342,7 @@ class _DirectorioViewState extends State<DirectorioView>
       padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
       decoration: BoxDecoration(
         color: isDark
-            ? Color(0xFF1E293B).withOpacity(0.95)
+            ? Color(0xFF111111).withOpacity(0.95)
             : Colors.white.withOpacity(0.95),
         borderRadius: BorderRadius.circular(15),
         boxShadow: [
@@ -356,7 +356,7 @@ class _DirectorioViewState extends State<DirectorioView>
         ],
         border: isDark
             ? Border.all(
-                color: Color(0xFF334155),
+                color: Color(0xFF1A1A1A),
                 width: 1,
               )
             : null,
@@ -390,7 +390,7 @@ class _DirectorioViewState extends State<DirectorioView>
       margin: EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
         color: isDark
-            ? Color(0xFF1E293B).withOpacity(0.95)
+            ? Color(0xFF111111).withOpacity(0.95)
             : Colors.white.withOpacity(0.95),
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
@@ -404,7 +404,7 @@ class _DirectorioViewState extends State<DirectorioView>
         ],
         border: isDark
             ? Border.all(
-                color: Color(0xFF334155),
+                color: Color(0xFF1A1A1A),
                 width: 1,
               )
             : null,
